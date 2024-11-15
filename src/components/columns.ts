@@ -1,7 +1,13 @@
 import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
 
-export const columns: ColumnDef<any>[] = [
+interface TableRow {
+  id: string
+  word: string
+  phonemes: string[]
+}
+
+export const columns: ColumnDef<TableRow>[] = [
   {
     accessorKey: 'word',
     header: () => h('div', { class: 'text-right' }, 'Word'),
@@ -10,10 +16,9 @@ export const columns: ColumnDef<any>[] = [
   {
     accessorKey: 'phonemes',
     header: () => h('div', { class: 'text-right' }, 'Phonemes'),
-
     cell: ({ row }) => {
-      const phonemes = row.getValue('phonemes')
-      return h('div', { class: 'text-right' }, Array.from(phonemes).join(', '))
+      const phonemes = row.getValue('phonemes') as string[]
+      return h('div', { class: 'text-right' }, phonemes.join(', '))
     }
   }
 ]

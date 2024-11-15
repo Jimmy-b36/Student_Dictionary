@@ -39,7 +39,11 @@ const { dictionary } = storeToRefs(useDictionaryStore())
 const currentPage = ref(1)
 
 const tableData = computed(() =>
-  Array.from(dictionary.value, ([word, data]) => ({ word, ...data }))
+  Array.from(dictionary.value, ([key, data]) => ({
+    id: key,
+    word: key,
+    phonemes: Array.from(data.phonemes)
+  }))
 )
 
 const changePage = (direction: 'previous' | 'next') => {
