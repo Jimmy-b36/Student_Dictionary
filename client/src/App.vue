@@ -1,89 +1,64 @@
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
+  <Button variant="secondary">Click me</Button>
+  <div class="container py-10 mx-auto">
+    <Table :columns="columns" :data="tableData" />
+    <div class="flex items-center justify-end py-4 space-x-2">
+      <Button
+        variant="outline"
+        size="sm"
+        :disabled="currentPage === 1"
+        @click="changePage('previous')"
+      >
+        Previous
+      </Button>
+      <Button variant="outline" size="sm" @click="changePage('next')"> Next </Button>
     </div>
-    <button @click="login">Login</button>
-    <button @click="updateJunction">Add words to database</button>
-  </header>
-
-  <RouterView />
+  </div>
 </template>
 
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-import { Factories } from './utils/Factory'
-const { login, updateJunction } = Factories()
+import Table from '@/components/Table.vue'
+import { columns } from '@/components/columns'
+
+import { Button } from '@/components/ui/button'
+import { computed, onBeforeMount, ref } from 'vue'
+
+import { storeToRefs } from 'pinia'
+import { useAuth } from './composables/auth'
+import { useDictionary } from './composables/dictionary'
+import { usePhonemes } from './composables/phonemes'
+import { useDictionaryStore } from './stores/dictionary'
+import { usePhonemesStore } from './stores/phonemes'
+
+const { login } = useAuth()
+const { fetchAllPhonemes } = usePhonemes()
+const { fetchDictionary } = useDictionary()
+const { phonemes } = storeToRefs(usePhonemesStore())
+const { dictionary } = storeToRefs(useDictionaryStore())
+
+const currentPage = ref(1)
+
+const tableData = computed(() =>
+  Array.from(dictionary.value, ([word, data]) => ({ word, ...data }))
+)
+
+const changePage = (direction: 'previous' | 'next') => {
+  if (direction === 'previous') {
+    currentPage.value--
+    fetchDictionary(currentPage.value, 30)
+  } else {
+    currentPage.value++
+    fetchDictionary(currentPage.value, 30)
+  }
+}
+
+onBeforeMount(async () => {
+  await login()
+  await fetchAllPhonemes()
+  await fetchDictionary()
+  console.log(phonemes.value)
+  console.log(dictionary.value)
+})
 </script>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
-</style>
+<style scoped lang="scss"></style>
