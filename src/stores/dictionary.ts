@@ -1,3 +1,4 @@
+import type { IDictionaryEntry } from '@/composables/dictionary'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -7,4 +8,4 @@ export const useDictionaryStore = defineStore('dictionary', () => {
   return { dictionary }
 })
 
-export interface IDictionary extends Map<string, { word: string; phonemes: Set<string> }> {}
+export interface IDictionary extends Map<string, IDictionaryEntry> {}
