@@ -51,7 +51,7 @@ export const useDictionaryService = () => {
   const { dictionary } = storeToRefs(useDictionaryStore())
   const initialItemsCache = ref<Map<string, IDictionaryEntry>>(new Map())
 
-  const getDictionaryPage = async (currentPage: number = 1, pageSize = 10) => {
+  const getDictionaryPage = async (currentPage: number = 1, pageSize = 50) => {
     dictionary.value.clear()
     try {
       const response = await pb
@@ -97,7 +97,7 @@ export const useDictionaryService = () => {
     dictionary.value.clear()
     if (!searchParam) {
       if (initialItemsCache.value.size === 0) {
-        await getDictionaryPage(1, 30)
+        await getDictionaryPage(1, 50)
       } else {
         // Restore from cache
         initialItemsCache.value.forEach((entry, word) => {

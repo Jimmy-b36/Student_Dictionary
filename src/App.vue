@@ -5,13 +5,10 @@
 </template>
 
 <script setup lang="ts">
-import TableContainer from '@/components/table/TableContainer.vue'
-
-import { Button } from '@/components/ui/button'
 import { onBeforeMount } from 'vue'
 
 import { useAuth } from './composables/auth'
-import { useDictionaryService } from './composables/dictionary'
+import { useDictionaryService } from './composables/dictionary.service'
 import { usePhonemes } from './composables/phonemes'
 
 const { login } = useAuth()

@@ -1,4 +1,4 @@
-import type { IDictionaryEntry } from '@/composables/dictionary'
+import type { IDictionaryEntry } from '@/composables/dictionary.service'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
