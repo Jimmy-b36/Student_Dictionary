@@ -2,6 +2,12 @@
   <div class="flex items-center space-x-2 mb-4">
     <InputText v-model="searchParam" class="mr-2" />
     <Button @click="searchDictionary(searchParam)">Search</Button>
+    <MultiSelect
+      v-model="searchParam"
+      :options="phonemeOptions"
+      placeholder="Phonemes"
+      display="chip"
+    />
   </div>
   <Table />
 </template>
@@ -10,19 +16,67 @@
 import { useDictionaryService } from '@/composables/dictionary.service'
 import { useTableStore } from '@/stores/tableStore'
 import { storeToRefs } from 'pinia'
-import Button from 'primevue/button'
 
 import { computed, ref, watch } from 'vue'
 
-const { searchDictionary, getDictionaryPage } = useDictionaryService()
+const { searchDictionary, getDictionaryPage, phonemeSearch } = useDictionaryService()
 
-const searchParam = ref('')
+const tableStore = useTableStore()
+const { searchParam } = storeToRefs(tableStore)
 
-const changePage = (direction: 'next' | 'previous') => {
-  // implement pagination
-}
+const selectedPhonemes = ref()
+const selectedPhonograms = ref()
+const phonemeOptions = ref([
+  '/o͝o/',
+  '/oi/',
+  '/ow/',
+  '/o͞o/',
+  '/or/',
+  '/ar/',
+  '/ər/',
+  '/ē/',
+  '/ōō/',
+  '/ū/',
+  '/ō/',
+  '/ī/',
+  '/ā/',
+  '/hw/',
+  '/kw/',
+  '/ks/',
+  '/ch/',
+  '/th/',
+  '/sh/',
+  '/z/',
+  '/v/',
+  '/w/',
+  '/y/',
+  '/ŭ/',
+  '/d/',
+  '/ĕ/',
+  '/ŏ/',
+  '/l/',
+  '/r/',
+  '/t/',
+  '/n/',
+  '/g/',
+  '/p/',
+  '/j/',
+  '/k/',
+  '/f/',
+  '/h/',
+  '/ĭ/',
+  '/s/',
+  '/b/',
+  '/m/',
+  '/ă/'
+])
+
+// watch(searchParam, (newVal) => {
+//   searchDictionary(newVal)
+// })
 
 watch(searchParam, (newVal) => {
-  searchDictionary(newVal)
+  console.log('🔥', newVal)
+  phonemeSearch(newVal)
 })
 </script>

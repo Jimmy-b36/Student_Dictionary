@@ -6,6 +6,7 @@
     tableStyle="min-width: 50rem"
     :rowsPerPageOptions="[5, 10, 20]"
     showGridlines
+    @page="onPageChange"
   >
     <Column field="word" header="Word" />
     <Column field="phonemes" header="Phonemes">
@@ -37,7 +38,23 @@
 
 <script setup lang="ts">
 import { useTableStore } from '@/stores/tableStore'
+
 import { storeToRefs } from 'pinia'
+import { type DataTablePageEvent } from 'primevue/datatable'
+const { isSearch } = storeToRefs(useTableStore())
+
+const onPageChange = (page: DataTablePageEvent) => {
+  if (isSearch.value) {
+    return
+  }
+
+  const totalFetchItems = 100
+  // adjusted page number for pre fetching
+  const adjustedPage = Math.floor((page.first + page.rows) / totalFetchItems)
+  if (page.page === page.pageCount - 1) {
+    useTableStore().fetchNextPages(adjustedPage + 1, totalFetchItems)
+  }
+}
 
 const { tableData } = storeToRefs(useTableStore())
 </script>

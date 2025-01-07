@@ -51,15 +51,15 @@ export const useDictionaryService = () => {
   const { dictionary } = storeToRefs(useDictionaryStore())
   const initialItemsCache = ref<Map<string, IDictionaryEntry>>(new Map())
 
-  const getDictionaryPage = async (currentPage: number = 1, pageSize = 50) => {
-    dictionary.value.clear()
+  const getDictionaryPage = async (currentPage: number = 1, pageSize = 100) => {
     try {
       const response = await pb
         .collection('global_dictionary')
         .getList<IDictionaryResponse>(currentPage, pageSize, {
           expand: 'word_phonemes(word).phoneme,word_phonograms(word).phonogram',
           fields:
-            'id, word,expand.word_phonemes(word).expand.phoneme.phoneme,expand.word_phonograms(word).expand.phonogram.phonogram'
+            'id, word,expand.word_phonemes(word).expand.phoneme.phoneme,expand.word_phonograms(word).expand.phonogram.phonogram',
+          skipTotal: true
         })
 
       if (currentPage === 1) {
@@ -90,6 +90,48 @@ export const useDictionaryService = () => {
       console.error('Error fetching dictionary page:', error)
       throw error
     }
+  }
+
+  const phonemeSearch = async (phonemeArr: string[]) => {
+    if (phonemeArr.length === 0) {
+      await getDictionaryPage(1, 100)
+      return
+    }
+
+    dictionary.value.clear()
+
+    const result = await pb.collection('word_phonemes').getFullList({
+      filter: phonemeArr.map((phoneme) => `phoneme.phoneme~"${phoneme}"`).join('||'),
+      expand: 'word.word_phonemes(word).phoneme,word.word_phonograms(word).phonogram',
+      fields:
+        'expand.word.word,expand.word.expand.word_phonograms(word).expand.phonogram.phonogram,expand.word.expand.word_phonemes(word).expand.phoneme.phoneme'
+    })
+
+    result.forEach(({ expand }) => {
+      if (!expand?.word) return
+
+      const phonemes = new Set(
+        expand.word.expand['word_phonemes(word)']?.map(
+          (phoneme: any) => phoneme.expand.phoneme.phoneme
+        )
+      )
+      const phonograms = new Set(
+        expand.word.expand['word_phonograms(word)']?.map(
+          (phonogram: any) => phonogram.expand.phonogram.phonogram
+        )
+      )
+
+      const word = expand.word.word
+
+      if (
+        phonemeArr.every((phoneme) => phonemes.has(phoneme)) &&
+        phonemes.size === phonemeArr.length
+      ) {
+        dictionary.value.set(word, { word, phonemes, phonograms })
+      }
+    })
+
+    return result
   }
 
   const searchDictionary = async (searchParam: string) => {
@@ -199,6 +241,7 @@ export const useDictionaryService = () => {
 
   return {
     getDictionaryPage,
-    searchDictionary
+    searchDictionary,
+    phonemeSearch
   }
 }
