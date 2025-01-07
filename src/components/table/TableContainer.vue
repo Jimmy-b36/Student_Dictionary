@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center space-x-2 mb-4">
-    <InputText v-model="searchParam" class="mr-2" />
+    <InputText v-model="wordSearch" class="mr-2" />
     <Button @click="searchDictionary(searchParam)">Search</Button>
     <MultiSelect
       v-model="searchParam"
@@ -8,6 +8,10 @@
       placeholder="Phonemes"
       display="chip"
     />
+    <Checkbox v-model="plusOne" binary inputId="plusOne" />
+    <label for="plusOne">
+      <span class="text-sm ml-2">+ Plus One Phoneme</span>
+    </label>
   </div>
   <Table />
 </template>
@@ -22,7 +26,9 @@ import { computed, ref, watch } from 'vue'
 const { searchDictionary, getDictionaryPage, phonemeSearch } = useDictionaryService()
 
 const tableStore = useTableStore()
-const { searchParam } = storeToRefs(tableStore)
+const { searchParam, plusOne } = storeToRefs(tableStore)
+
+const wordSearch = ref('')
 
 const selectedPhonemes = ref()
 const selectedPhonograms = ref()
@@ -71,12 +77,11 @@ const phonemeOptions = ref([
   '/ă/'
 ])
 
-// watch(searchParam, (newVal) => {
-//   searchDictionary(newVal)
-// })
+watch(wordSearch, (newVal) => {
+  searchDictionary(newVal)
+})
 
 watch(searchParam, (newVal) => {
-  console.log('🔥', newVal)
   phonemeSearch(newVal)
 })
 </script>

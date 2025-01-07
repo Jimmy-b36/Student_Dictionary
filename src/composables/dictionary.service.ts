@@ -1,3 +1,4 @@
+import { useTableStore } from '@/stores/tableStore'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useDictionaryStore } from '../stores/dictionary'
@@ -50,6 +51,7 @@ export interface IDictionaryEntry {
 export const useDictionaryService = () => {
   const { dictionary } = storeToRefs(useDictionaryStore())
   const initialItemsCache = ref<Map<string, IDictionaryEntry>>(new Map())
+  const { plusOne } = storeToRefs(useTableStore())
 
   const getDictionaryPage = async (currentPage: number = 1, pageSize = 100) => {
     try {
@@ -123,9 +125,11 @@ export const useDictionaryService = () => {
 
       const word = expand.word.word
 
+      const phonemeArrLength = plusOne.value ? phonemeArr.length + 1 : phonemeArr.length
+
       if (
         phonemeArr.every((phoneme) => phonemes.has(phoneme)) &&
-        phonemes.size === phonemeArr.length
+        phonemes.size === phonemeArrLength
       ) {
         dictionary.value.set(word, { word, phonemes, phonograms })
       }

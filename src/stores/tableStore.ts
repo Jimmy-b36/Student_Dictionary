@@ -21,6 +21,8 @@ export const useTableStore = defineStore('table', () => {
     return !!searchParam.value
   })
 
+  const plusOne = ref(false)
+
   const tableData = computed<TableRow[]>(() => {
     return Array.from(dictionary.value, ([key, data]) => ({
       id: key,
@@ -38,6 +40,7 @@ export const useTableStore = defineStore('table', () => {
     tableData,
     fetchNextPages,
     searchParam,
-    isSearch
+    isSearch,
+    plusOne
   }
 })
