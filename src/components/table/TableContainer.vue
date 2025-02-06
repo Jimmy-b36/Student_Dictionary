@@ -24,7 +24,7 @@ import { storeToRefs } from 'pinia'
 
 import { ref, watch } from 'vue'
 
-const { searchDictionary, phonemeSearch } = useDictionaryService()
+const { searchDictionary } = useDictionaryService()
 
 const tableStore = useTableStore()
 const { searchParam, plusOne } = storeToRefs(tableStore)
@@ -33,9 +33,5 @@ const wordSearch = ref('')
 
 watch(wordSearch, (newVal) => {
   searchDictionary(newVal)
-})
-
-watch(searchParam, (newVal) => {
-  phonemeSearch(newVal)
 })
 </script>
