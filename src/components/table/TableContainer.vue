@@ -1,6 +1,7 @@
 <template>
   <div class="flex items-center space-x-2 mb-4">
     <InputText v-model="wordSearch" class="mr-2" />
+    <!-- TODO implement search -->
     <!-- <Button @click="searchDictionary(searchParam)">Search</Button>
     <MultiSelect
       v-model="searchParam"
