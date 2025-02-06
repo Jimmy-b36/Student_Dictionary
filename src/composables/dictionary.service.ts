@@ -94,49 +94,49 @@ export const useDictionaryService = () => {
     }
   }
 
-  const phonemeSearch = async (phonemeArr: string[]) => {
-    if (phonemeArr.length === 0) {
-      await getDictionaryPage(1, 100)
-      return
-    }
+  // const phonemeSearch = async (phonemeArr: string[]) => {
+  //   if (phonemeArr.length === 0) {
+  //     await getDictionaryPage(1, 100)
+  //     return
+  //   }
 
-    dictionary.value.clear()
+  //   dictionary.value.clear()
 
-    const result = await pb.collection('word_phonemes').getFullList({
-      filter: phonemeArr.map((phoneme) => `phoneme.phoneme~"${phoneme}"`).join('||'),
-      expand: 'word.word_phonemes(word).phoneme,word.word_phonograms(word).phonogram',
-      fields:
-        'expand.word.word,expand.word.expand.word_phonograms(word).expand.phonogram.phonogram,expand.word.expand.word_phonemes(word).expand.phoneme.phoneme'
-    })
+  //   const result = await pb.collection('word_phonemes').getFullList({
+  //     filter: phonemeArr.map((phoneme) => `phoneme.phoneme~"${phoneme}"`).join('||'),
+  //     expand: 'word.word_phonemes(word).phoneme,word.word_phonograms(word).phonogram',
+  //     fields:
+  //       'expand.word.word,expand.word.expand.word_phonograms(word).expand.phonogram.phonogram,expand.word.expand.word_phonemes(word).expand.phoneme.phoneme'
+  //   })
 
-    result.forEach(({ expand }) => {
-      if (!expand?.word) return
+  //   result.forEach(({ expand }) => {
+  //     if (!expand?.word) return
 
-      const phonemes = new Set(
-        expand.word.expand['word_phonemes(word)']?.map(
-          (phoneme: any) => phoneme.expand.phoneme.phoneme
-        )
-      )
-      const phonograms = new Set(
-        expand.word.expand['word_phonograms(word)']?.map(
-          (phonogram: any) => phonogram.expand.phonogram.phonogram
-        )
-      )
+  //     const phonemes = new Set(
+  //       expand.word.expand['word_phonemes(word)']?.map(
+  //         (phoneme: any) => phoneme.expand.phoneme.phoneme
+  //       )
+  //     )
+  //     const phonograms = new Set(
+  //       expand.word.expand['word_phonograms(word)']?.map(
+  //         (phonogram: any) => phonogram.expand.phonogram.phonogram
+  //       )
+  //     )
 
-      const word = expand.word.word
+  //     const word = expand.word.word
 
-      const phonemeArrLength = plusOne.value ? phonemeArr.length + 1 : phonemeArr.length
+  //     const phonemeArrLength = plusOne.value ? phonemeArr.length + 1 : phonemeArr.length
 
-      if (
-        phonemeArr.every((phoneme) => phonemes.has(phoneme)) &&
-        phonemes.size === phonemeArrLength
-      ) {
-        dictionary.value.set(word, { word, phonemes, phonograms })
-      }
-    })
+  //     if (
+  //       phonemeArr.every((phoneme) => phonemes.has(phoneme)) &&
+  //       phonemes.size === phonemeArrLength
+  //     ) {
+  //       dictionary.value.set(word, { word, phonemes, phonograms })
+  //     }
+  //   })
 
-    return result
-  }
+  //   return result
+  // }
 
   const searchDictionary = async (searchParam: string) => {
     searchParam = searchParam.trim()
@@ -245,7 +245,6 @@ export const useDictionaryService = () => {
 
   return {
     getDictionaryPage,
-    searchDictionary,
-    phonemeSearch
+    searchDictionary
   }
 }
