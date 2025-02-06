@@ -49,7 +49,7 @@ export interface IDictionaryEntry {
 }
 
 export const useDictionaryService = () => {
-  const { dictionary } = storeToRefs(useDictionaryStore())
+  const { dictionary, phonemes, phonograms } = storeToRefs(useDictionaryStore())
   const initialItemsCache = ref<Map<string, IDictionaryEntry>>(new Map())
   const { plusOne } = storeToRefs(useTableStore())
 
@@ -91,6 +91,26 @@ export const useDictionaryService = () => {
     }
   }
 
+  const fetchAllPhonemes = async () => {
+    const response = await pb.collection('phonemes').getFullList()
+    phonemes.value = response.map((phonemeObj: any) => {
+      return {
+        id: phonemeObj.id,
+        phoneme: phonemeObj.phoneme
+      }
+    })
+  }
+
+  const fetchAllPhonograms = async () => {
+    const response = await pb.collection('phonograms').getFullList()
+    phonograms.value = response.map((phonogramObj: any) => {
+      return {
+        id: phonogramObj.id,
+        phonogram: phonogramObj.phonogram
+      }
+    })
+  }
+
   // TODO implement search
   // const phonemeSearch = async (phonemeArr: string[]) => {
   //   console.log('🔥', phonemeArr)
@@ -111,7 +131,6 @@ export const useDictionaryService = () => {
   //   result.forEach(({ expand }) => {
   //     if (!expand?.word) return
 
-
   //     const phonemes = new Set<{ id: string; phoneme: string }>(
   //       expand.word.expand['word_phonemes(word)']?.map((phoneme: any) => phoneme.expand.phoneme)
   //     )
@@ -126,7 +145,6 @@ export const useDictionaryService = () => {
   //     const word = expand.word.word
 
   //     const wordId = expand.word.id
-
 
   //     const phonemeArrLength = plusOne.value ? phonemeArr.length + 1 : phonemeArr.length
 
@@ -256,9 +274,11 @@ export const useDictionaryService = () => {
       const res = await pb.collection(collection).delete(id)
       if (res === true) {
         console.log(`✅ Successfully deleted ${message}`)
+        return true
       }
     } catch (error) {
-      console.error(`Error deleting ${message}:`, error)
+      console.error(`❌ Error deleting ${message}: ${error}`)
+      throw error
     }
   }
 
@@ -274,30 +294,61 @@ export const useDictionaryService = () => {
     const type = isPhoneme ? 'phonemes' : 'phonograms'
     const collection = isPhoneme ? 'word_phonemes' : 'word_phonograms'
 
-    entry[type].forEach((value) => {
-      if (value.id === tag.id) {
-        // Annoying type safety
-        if (isPhoneme) {
-          ;(entry.phonemes as Set<{ id: string; phoneme: string }>).delete(
-            value as { id: string; phoneme: string }
-          )
-        } else {
-          ;(entry.phonograms as Set<{ id: string; phonogram: string }>).delete(
-            value as { id: string; phonogram: string }
-          )
-        }
-      }
-    })
-
     const res = await pb.collection(collection).getFullList({
       filter: `word="${wordId}" && ${isPhoneme ? 'phoneme' : 'phonogram'}="${tag.id}"`
     })
-    _delete(collection, res[0].id, `Removed ${tag.tag} from ${word}`)
+    try {
+      await _delete(collection, res[0].id, `Removed ${tag.tag} from ${word}`)
+    } catch (error) {
+      throw new Error(`❌ Error removing ${tag.tag} from ${word}`)
+    }
+
+    entry[type].forEach((value) => {
+      if (value.id === tag.id) {
+        if (isPhoneme) {
+          const phonemeTag = value as { id: string; phoneme: string }
+          entry.phonemes.delete(phonemeTag)
+        } else {
+          const phonogramTag = value as { id: string; phonogram: string }
+          entry.phonograms.delete(phonogramTag)
+        }
+      }
+    })
+  }
+
+  const addTagToWord = async (
+    word: string,
+    wordId: string,
+    tag: { id: string; tag: string },
+    isPhoneme: boolean
+  ) => {
+    const entry = dictionary.value.get(word)
+    if (!entry) return
+    const type = isPhoneme ? 'phonemes' : 'phonograms'
+    const collection = isPhoneme ? 'word_phonemes' : 'word_phonograms'
+
+    // Being lazy with types
+    if (entry[type].has(tag as any)) return
+    entry[type].add(tag as any)
+
+    try {
+      await pb.collection(collection).create({
+        word: wordId,
+        [isPhoneme ? 'phoneme' : 'phonogram']: tag.id
+      })
+      return true
+    } catch (error) {
+      console.error(error)
+      return false
+    }
   }
 
   return {
     getDictionaryPage,
     searchDictionary,
-    removeTagFromWord
+    removeTagFromWord,
+    addTagToWord,
+    fetchAllPhonemes,
+    fetchAllPhonograms
   }
 }

@@ -11,9 +11,15 @@
     <Column field="word" header="Word" />
     <Column field="phonemes" header="Phonemes">
       <template #body="{ data }">
-        <Tag v-for="phoneme in data.phonemes" :key="phoneme" severity="info" rounded class="mr-2">
+        <Tag
+          v-for="phoneme in data.phonemes"
+          :key="phoneme"
+          severity="info"
+          rounded
+          class="mr-2 !items-center"
+        >
           <template #icon>
-            {{ phoneme.phoneme }}
+            <span class="mx-1 text-lg">{{ phoneme.phoneme }}</span>
             <RemoveTagModal
               :word="data.word"
               :word-id="data.id"
@@ -23,6 +29,7 @@
             />
           </template>
         </Tag>
+        <AddTagModal :word="data.word" :word-id="data.id" :is-phoneme="true" />
       </template>
     </Column>
     <Column field="phonograms" header="Phonograms">
@@ -32,11 +39,10 @@
           :key="phonogram"
           severity="success"
           rounded
-          class="mr-2"
+          class="mr-2 !items-end"
         >
           <template #icon>
-            {{ phonogram.phonogram }}
-
+            <span class="mx-1 text-lg">{{ phonogram.phonogram }}</span>
             <RemoveTagModal
               :word="data.word"
               :word-id="data.id"
@@ -46,6 +52,7 @@
             />
           </template>
         </Tag>
+        <AddTagModal :word="data.word" :word-id="data.id" :is-phoneme="false" />
       </template>
     </Column>
   </DataTable>
