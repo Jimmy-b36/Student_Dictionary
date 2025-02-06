@@ -20,6 +20,8 @@ export default defineConfig({
     }
   },
   server: {
-    port: 5761
+    fs: {
+      strict: false
+    }
   }
 })

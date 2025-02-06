@@ -22,8 +22,8 @@ export const Factories = () => {
   }
 
   const addWordsToDatabase = async () => {
-    let wordsPhonograms = JSON.parse(JSON.stringify(wordPhonogramList))
-    for (let item of wordsPhonograms) {
+    const wordsPhonograms = JSON.parse(JSON.stringify(wordPhonogramList))
+    for (const item of wordsPhonograms) {
       const word = Object.keys(item)[0]
       await pb.collection('global_dictionary').create({
         word: word

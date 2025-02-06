@@ -90,6 +90,7 @@ export const useDictionaryService = () => {
       throw error
     }
   }
+
   // TODO implement search
   // const phonemeSearch = async (phonemeArr: string[]) => {
   //   console.log('🔥', phonemeArr)
@@ -110,6 +111,7 @@ export const useDictionaryService = () => {
   //   result.forEach(({ expand }) => {
   //     if (!expand?.word) return
 
+
   //     const phonemes = new Set<{ id: string; phoneme: string }>(
   //       expand.word.expand['word_phonemes(word)']?.map((phoneme: any) => phoneme.expand.phoneme)
   //     )
@@ -117,11 +119,14 @@ export const useDictionaryService = () => {
   //     const phonograms = new Set<{ id: string; phonogram: string }>(
   //       expand.word.expand?.['word_phonograms(word)']?.map(
   //         (phonogram: any) => phonogram.expand.phonogram
+
   //       )
   //     )
 
   //     const word = expand.word.word
+
   //     const wordId = expand.word.id
+
 
   //     const phonemeArrLength = plusOne.value ? phonemeArr.length + 1 : phonemeArr.length
 
@@ -129,7 +134,9 @@ export const useDictionaryService = () => {
   //       phonemeArr.every((phoneme) => phonemes.has(phoneme)) &&
   //       phonemes.size === phonemeArrLength
   //     ) {
+
   //       dictionary.value.set(word, { wordId, phonemes, phonograms })
+
   //     }
   //   })
 

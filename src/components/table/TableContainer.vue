@@ -27,7 +27,7 @@ import { ref, watch } from 'vue'
 const { searchDictionary } = useDictionaryService()
 
 const tableStore = useTableStore()
-const { searchParam, plusOne } = storeToRefs(tableStore)
+const { plusOne } = storeToRefs(tableStore)
 
 const wordSearch = ref('')
 
