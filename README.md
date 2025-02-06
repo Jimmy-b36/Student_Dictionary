@@ -1,45 +1,21 @@
-# client
+# Student dictionary project
 
-This template should help get you started developing with Vue 3 in Vite.
+## TODO
 
-## Recommended IDE Setup
+- [ ] See if I can use AI to create a better dataset for entering into the database
+- [ ] Enter the new dataset into the database
+- [✅] Hook up the deleting of phonemes and phonograms to the database
+- [ ] Create filters to enter words and view the phonemes and phonograms
+- [ ] Improve the search functionality
+- [ ] For the search we should have different filters for words and phonemes/phonograms (phonemes/phonograms should have somesort of autocomplete)
+- [ ] Add tests for the search functionality
+- [ ] Get some error messages displayed to user
+  - [ ] Errors for deleting a tag
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Currently writing a script to hit openAI and generate a better dataset for the phonemes and phonograms
 
-## Type Support for `.vue` Imports in TS
+- Script is created but some of the phonemes seem to be incorrect, need to continue working on the prompt
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## Notes
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+I think I need the phoneme/phonogram ID so I can remove efficiently, otherwise I have to do a bunch of joins to remove the tag
