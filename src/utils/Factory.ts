@@ -65,7 +65,6 @@ export const Factories = () => {
   return {
     login,
     addWordsToDatabase,
-    updateJunction,
-    printPhonemes
+    updateJunction
   }
 }
