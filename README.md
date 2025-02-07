@@ -2,19 +2,19 @@
 
 ## TODO
 
-- [ ] See if I can use AI to create a better dataset for entering into the database
 - [ ] Enter the new dataset into the database
-- [✅] Hook up the deleting of phonemes and phonograms to the database
-- [ ] Create filters to enter words and view the phonemes and phonograms
 - [ ] Improve the search functionality
+  - [ ] Create filters to enter words and view the phonemes and phonograms
 - [ ] For the search we should have different filters for words and phonemes/phonograms (phonemes/phonograms should have somesort of autocomplete)
+  - [ ] What would be better, an autocomplete or select from a list
 - [ ] Add tests for the search functionality
-- [ ] Get some error messages displayed to user
-  - [ ] Errors for deleting a tag
+- [ ] Review error handling for adding and removing tags
+- [ ] Login functionality
+  - [ ] How many different users do we need? [Admin, Teacher, Student]
 
-## Currently writing a script to hit openAI and generate a better dataset for the phonemes and phonograms
+## Just added the ability to add tags to a word
 
-- Script is created but some of the phonemes seem to be incorrect, need to continue working on the prompt
+- Need to repopulate db with new dataset
 
 ## Notes
 

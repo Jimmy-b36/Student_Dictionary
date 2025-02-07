@@ -9,14 +9,13 @@ import { onBeforeMount } from 'vue'
 
 import { useAuth } from './composables/auth'
 import { useDictionaryService } from './composables/dictionary.service'
-import { usePhonemes } from './composables/phonemes'
 
 const { login } = useAuth()
-const { fetchAllPhonemes } = usePhonemes()
-const { getDictionaryPage } = useDictionaryService()
+const { getDictionaryPage, fetchAllPhonemes, fetchAllPhonograms } = useDictionaryService()
 
 onBeforeMount(async () => {
   await login()
+  await fetchAllPhonograms()
   await fetchAllPhonemes()
   await getDictionaryPage()
 })
