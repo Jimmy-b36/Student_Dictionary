@@ -9,10 +9,6 @@
       placeholder="Phonemes"
       display="chip"
     /> -->
-    <Checkbox v-model="plusOne" binary inputId="plusOne" />
-    <label for="plusOne">
-      <span class="text-sm ml-2">+ Plus One Phoneme</span>
-    </label>
   </div>
   <Table />
 </template>
@@ -27,7 +23,6 @@ import { ref, watch } from 'vue'
 const { searchDictionary } = useDictionaryService()
 
 const tableStore = useTableStore()
-const { plusOne } = storeToRefs(tableStore)
 
 const wordSearch = ref('')
 

@@ -51,7 +51,6 @@ export interface IDictionaryEntry {
 export const useDictionaryService = () => {
   const { dictionary, phonemes, phonograms } = storeToRefs(useDictionaryStore())
   const initialItemsCache = ref<Map<string, IDictionaryEntry>>(new Map())
-  const { plusOne } = storeToRefs(useTableStore())
 
   // -------------------
   // Fetch functions
