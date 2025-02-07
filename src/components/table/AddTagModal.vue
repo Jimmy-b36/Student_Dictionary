@@ -16,7 +16,8 @@
       placeholder="Select Tags"
       :maxSelectedLabels="3"
       class="w-full md:w-100 mb-4"
-      :disabled="selectedTags.length >= 3 || loading"
+      :disabled="loading"
+      :selectionLimit="3"
     />
 
     <Message
@@ -60,21 +61,30 @@ const options = ref<{}[]>([])
 const errorMessage = ref<string[]>([])
 const visible = ref(false)
 const loading = ref(false)
+const ERROR_TIMEOUT = 3000
 
 const addTag = async (wordId: string, isPhoneme: boolean) => {
   try {
     if (!selectedTags.value.length) {
       throw new Error('Please select at least one tag')
     }
-
+    errorMessage.value = []
     loading.value = true
 
+    // I don't want it to completely fail just because one tag fails
     await Promise.all(
       selectedTags.value.map(async (tag: { id: string; tag: string }) => {
-        const result = await addTagToWord(props.word, wordId, tag, isPhoneme)
-        if (!result) throw new Error(`Failed to add ${tag.tag} to ${props.word}`)
+        try {
+          const res = await addTagToWord(props.word, wordId, tag, isPhoneme)
+          if (res.type === 'error') {
+            errorMessage.value.push(res.message)
+          }
+        } catch (error: any) {
+          console.log('🔥', error)
+        }
       })
     )
+    if (errorMessage.value.length) return
 
     visible.value = false
     selectedTags.value = []
@@ -82,7 +92,7 @@ const addTag = async (wordId: string, isPhoneme: boolean) => {
     errorMessage.value = [error.message]
     setTimeout(() => {
       errorMessage.value = []
-    }, 3000)
+    }, ERROR_TIMEOUT)
   } finally {
     loading.value = false
   }

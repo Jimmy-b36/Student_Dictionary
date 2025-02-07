@@ -25,8 +25,20 @@
     </h5>
     <Message severity="error" v-if="errorMessage" class="mb-2">{{ errorMessage }}</Message>
     <div class="flex justify-end gap-2">
-      <Button type="button" label="Cancel" severity="secondary" @click="visible = false" :disabled="loading"></Button>
-      <Button type="button" label="Remove" severity="danger" @click="removeTag" :loading="loading"></Button>
+      <Button
+        type="button"
+        label="Cancel"
+        severity="secondary"
+        @click="visible = false"
+        :disabled="loading"
+      ></Button>
+      <Button
+        type="button"
+        label="Remove"
+        severity="danger"
+        @click="removeTag"
+        :loading="loading"
+      ></Button>
     </div>
   </Dialog>
 </template>
@@ -39,6 +51,7 @@ const { removeTagFromWord } = useDictionaryService()
 const visible = ref(false)
 const errorMessage = ref<string>('')
 const loading = ref(false)
+const ERROR_TIMEOUT = 3000
 
 const removeTag = async () => {
   try {
@@ -54,7 +67,7 @@ const removeTag = async () => {
     errorMessage.value = error.message
     setTimeout(() => {
       errorMessage.value = ''
-    }, 3000)
+    }, ERROR_TIMEOUT)
   } finally {
     loading.value = false
   }
