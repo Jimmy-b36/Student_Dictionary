@@ -1,5 +1,5 @@
+import wordPhonogramList from '@/data/output.json'
 import PocketBase from 'pocketbase'
-import wordPhonogramList from '../data/wordPhonogramList.json'
 
 const pb = new PocketBase('https://pocket.jaffs.org')
 
@@ -12,15 +12,16 @@ interface IPhonemeObj {
   updated: string
 }
 
-export const Factories = () => {
-  const login = async () => {
-    const authData = await pb.admins.authWithPassword(
-      import.meta.env.VITE_POCKETBASE_EMAIL,
-      import.meta.env.VITE_POCKETBASE_PASSWORD
-    )
-    return authData
-  }
+interface IPhonogramObj {
+  collectionId: string
+  collectionName: string
+  created: string
+  id: string
+  phonogram: string
+  updated: string
+}
 
+export const Factories = () => {
   const addWordsToDatabase = async () => {
     const wordsPhonograms = JSON.parse(JSON.stringify(wordPhonogramList))
     for (const item of wordsPhonograms) {
@@ -34,11 +35,11 @@ export const Factories = () => {
   const updateJunction = async () => {
     const wordsPhonograms = JSON.parse(JSON.stringify(wordPhonogramList))
     const fullPhonemes = await pb.collection('phonemes').getFullList()
+    const fullPhonograms = await pb.collection('phonograms').getFullList()
 
     try {
-      for (const item of wordsPhonograms) {
-        const word = Object.keys(item)[0]
-        const { phonemes } = item[word]
+      for (const word in wordsPhonograms) {
+        const { phonemes, phonograms } = wordsPhonograms[word]
 
         const wordRecord = await pb
           .collection('global_dictionary')
@@ -56,6 +57,19 @@ export const Factories = () => {
             })
           }
         }
+
+        for (const phonogram of phonograms) {
+          const phonogramId = fullPhonograms.find(
+            (phonogramObj: any) => (phonogramObj as IPhonogramObj).phonogram === phonogram
+          )?.id
+
+          if (wordRecord && phonogramId) {
+            await pb.collection('word_phonograms').create({
+              word: wordRecord.id,
+              phonogram: phonogramId
+            })
+          }
+        }
       }
     } catch (error) {
       console.error('Error in updateJunction:', error)
@@ -63,7 +77,6 @@ export const Factories = () => {
   }
 
   return {
-    login,
     addWordsToDatabase,
     updateJunction
   }
