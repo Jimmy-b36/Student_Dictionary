@@ -418,12 +418,58 @@ export const useDictionaryService = () => {
     }
   }
 
+  const reorderTags = async (
+    word: string,
+    wordId: string,
+    tags: Array<{ id: string; [key: string]: string }>,
+    isPhoneme: boolean
+  ): Promise<void> => {
+    const entry = dictionary.value.get(word)
+    if (!entry) return
+
+    const type = isPhoneme ? 'phonemes' : 'phonograms'
+    const collection = isPhoneme ? 'word_phonemes' : 'word_phonograms'
+    const tagKey = isPhoneme ? 'phoneme' : 'phonogram'
+
+    try {
+      // Delete all existing associations
+      const existingTags = await pb.collection(collection).getFullList({
+        filter: `word="${wordId}"`
+      })
+
+      for (const tag of existingTags) {
+        await _delete(collection, tag.id, `${tagKey} from ${word}`)
+      }
+
+      // Create new associations in order
+      pb.autoCancellation(false)
+      for (const tag of tags) {
+        await pb.collection(collection).create({
+          word: wordId,
+          [tagKey]: tag.id,
+        })
+      }
+      pb.autoCancellation(true)
+
+      // Update local state
+      if (isPhoneme) {
+        entry.phonemes = new Set(tags as Array<{ id: string; phoneme: string }>)
+      } else {
+        entry.phonograms = new Set(tags as Array<{ id: string; phonogram: string }>)
+      }
+    } catch (error) {
+      console.log('🥶 Error reordering tags:', error)
+      throw new Error(`Failed to reorder ${type} for ${word}`)
+    }
+  }
+
   return {
     getDictionaryPage,
     searchDictionary,
     removeTagFromWord,
     addTagToWord,
     fetchAllPhonemes,
-    fetchAllPhonograms
+    fetchAllPhonograms,
+    reorderTags
   }
 }
