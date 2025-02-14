@@ -53,6 +53,7 @@ const errorMessage = ref<string>('')
 const loading = ref(false)
 const ERROR_TIMEOUT = 3000
 
+// TODO: only admins can remove tags
 const removeTag = async () => {
   try {
     loading.value = true
