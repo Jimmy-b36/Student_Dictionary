@@ -1,4 +1,5 @@
 <template>
+  <Toast />
   <DataTable
     :value="tableData"
     paginator
@@ -11,27 +12,37 @@
     <Column field="word" header="Word" />
     <Column field="phonemes" header="Phonemes">
       <template #body="{ data }">
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap gap-2" :class="`${drag ? 'cursor-grabbing' : 'cursor-grab'}`">
           <draggable
             v-model="data.phonemes"
+            v-bind="dragOptions"
             item-key="id"
             @change="() => handleReorder(data.phonemes, data.word, data.id, true)"
             class="flex flex-wrap gap-2"
+            @start="drag = true"
+            @end="drag = false"
           >
-            <template #header></template>
             <template #item="{ element }">
-              <Tag severity="info" rounded class="mr-2 !items-center cursor-move">
-                <template #icon>
-                  <span class="mx-1 text-lg">{{ element.phoneme }}</span>
-                  <RemoveTagModal
-                    :word="data.word"
-                    :word-id="data.id"
-                    :tag="element.phoneme"
-                    :tag-id="element.id"
-                    :is-phoneme="true"
-                  />
-                </template>
-              </Tag>
+              <transition-group
+                type="transition"
+                name="flip-list"
+                tag="div"
+                class="flex flex-wrap gap-2"
+              >
+                <Tag :key="element.id" severity="info" rounded class="!items-center">
+                  <template #icon>
+                    <img :src="dragHandle" alt="drag handle" class="h-5" />
+                    <span class="mr-1 text-lg">{{ element.phoneme }}</span>
+                    <RemoveTagModal
+                      :word="data.word"
+                      :word-id="data.id"
+                      :tag="element.phoneme"
+                      :tag-id="element.id"
+                      :is-phoneme="true"
+                    />
+                  </template>
+                </Tag>
+              </transition-group>
             </template>
           </draggable>
           <AddTagModal :word="data.word" :word-id="data.id" :is-phoneme="true" />
@@ -40,27 +51,42 @@
     </Column>
     <Column field="phonograms" header="Phonograms">
       <template #body="{ data }">
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap gap-2" :class="`${drag ? 'cursor-grabbing' : 'cursor-grab'}`">
           <draggable
             v-model="data.phonograms"
+            v-bind="dragOptions"
             item-key="id"
             @change="() => handleReorder(data.phonograms, data.word, data.id, false)"
             class="flex flex-wrap gap-2"
+            @start="drag = true"
+            @end="drag = false"
           >
-            <template #header></template>
             <template #item="{ element }">
-              <Tag severity="success" rounded class="mr-2 !items-end cursor-move">
-                <template #icon>
-                  <span class="mx-1 text-lg">{{ element.phonogram }}</span>
-                  <RemoveTagModal
-                    :word="data.word"
-                    :word-id="data.id"
-                    :tag="element.phonogram"
-                    :tag-id="element.id"
-                    :is-phoneme="false"
-                  />
-                </template>
-              </Tag>
+              <transition-group
+                type="transition"
+                name="flip-list"
+                tag="div"
+                class="flex flex-wrap gap-2"
+              >
+                <Tag
+                  :key="element.id"
+                  severity="success"
+                  rounded
+                  class="!items-center !justify-center"
+                >
+                  <template #icon>
+                    <img :src="dragHandle" alt="drag handle" class="h-5" />
+                    <span class="mx-1 text-lg">{{ element.phonogram }}</span>
+                    <RemoveTagModal
+                      :word="data.word"
+                      :word-id="data.id"
+                      :tag="element.phonogram"
+                      :tag-id="element.id"
+                      :is-phoneme="false"
+                    />
+                  </template>
+                </Tag>
+              </transition-group>
             </template>
           </draggable>
           <AddTagModal :word="data.word" :word-id="data.id" :is-phoneme="false" />
@@ -71,23 +97,43 @@
 </template>
 
 <script setup lang="ts">
+import dragHandle from '@/assets/drag-handle-svgrepo-com.svg'
 import { useDictionaryService } from '@/composables/dictionary.service'
 import { useTableStore } from '@/stores/tableStore'
 import { storeToRefs } from 'pinia'
 import { type DataTablePageEvent } from 'primevue/datatable'
+import Toast from 'primevue/toast'
+import { useToast } from 'primevue/usetoast'
+import { computed, ref } from 'vue'
 import draggable from 'vuedraggable'
 
 const tableStore = useTableStore()
 const { tableData } = storeToRefs(tableStore)
 const { reorderTags } = useDictionaryService()
 
+const drag = ref(false)
+const toast = useToast()
+
+const dragOptions = computed(() => {
+  return {
+    animation: 200,
+    group: 'description',
+    disabled: false,
+    ghostClass: 'ghost'
+  }
+})
+
 const handleReorder = async (tags: any[], word: string, wordId: number, isPhoneme: boolean) => {
-  console.log('🥶 Reorder event:', { word, wordId, isPhoneme })
-  // I need to make the re-order faster, it re-orders then sends the request, can I update the UI then send the request?
   try {
     await reorderTags(word, String(wordId), tags, isPhoneme)
   } catch (error) {
     console.log('🥶 Error handling reorder:', error)
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: `Failed to reorder ${isPhoneme ? 'phonemes' : 'phonograms'} for "${word}"`,
+      life: 3000
+    })
   }
 }
 
@@ -100,3 +146,10 @@ const onPageChange = (page: DataTablePageEvent) => {
   }
 }
 </script>
+
+<style scoped>
+.ghost {
+  opacity: 0.5;
+  border-radius: 0.5rem;
+}
+</style>

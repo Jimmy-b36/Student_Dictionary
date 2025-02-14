@@ -382,6 +382,15 @@ export const useDictionaryService = () => {
   ): Promise<void> => {
     const entry = dictionary.value.get(word)
     if (!entry) return
+    const originalPhonemes = new Set(entry.phonemes)
+    const originalPhonograms = new Set(entry.phonograms)
+
+    // Update local state immediately
+    if (isPhoneme) {
+      entry.phonemes = new Set(tags) as Set<{ id: string; phoneme: string }>
+    } else {
+      entry.phonograms = new Set(tags) as Set<{ id: string; phonogram: string }>
+    }
 
     const type = isPhoneme ? 'phonemes' : 'phonograms'
     const collection = isPhoneme ? 'word_phonemes' : 'word_phonograms'
@@ -402,18 +411,17 @@ export const useDictionaryService = () => {
       for (const tag of tags) {
         await pb.collection(collection).create({
           word: wordId,
-          [tagKey]: tag.id,
+          [tagKey]: tag.id
         })
       }
       pb.autoCancellation(true)
-
-      // Update local state
-      if (isPhoneme) {
-        entry.phonemes = new Set(tags as Array<{ id: string; phoneme: string }>)
-      } else {
-        entry.phonograms = new Set(tags as Array<{ id: string; phonogram: string }>)
-      }
     } catch (error) {
+      // Restore original state if an error occurs
+      if (isPhoneme) {
+        entry.phonemes = originalPhonemes
+      } else {
+        entry.phonograms = originalPhonograms
+      }
       console.log('🥶 Error reordering tags:', error)
       throw new Error(`Failed to reorder ${type} for ${word}`)
     }
@@ -429,6 +437,5 @@ export const useDictionaryService = () => {
     phonemeSearch,
     phonogramSearch,
     reorderTags
-
   }
 }
