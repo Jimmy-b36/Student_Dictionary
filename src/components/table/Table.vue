@@ -31,7 +31,7 @@
               >
                 <Tag :key="element.id" severity="info" rounded class="!items-center">
                   <template #icon>
-                    <img :src="dragHandle" alt="drag handle" class="h-5" />
+                    <img :src="dragHandle" alt="drag handle" class="h-5 w-5" />
                     <span class="mr-1 text-lg">{{ element.phoneme }}</span>
                     <RemoveTagModal
                       :word="data.word"
@@ -75,7 +75,7 @@
                   class="!items-center !justify-center"
                 >
                   <template #icon>
-                    <img :src="dragHandle" alt="drag handle" class="h-5" />
+                    <img :src="dragHandle" alt="drag handle" class="h-5 w-5" />
                     <span class="mx-1 text-lg">{{ element.phonogram }}</span>
                     <RemoveTagModal
                       :word="data.word"
@@ -97,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import dragHandle from '@/assets/drag-handle-svgrepo-com.svg'
+import dragHandle from '@/assets/drag-handle-svgrepo-com.svg?url'
 import { useDictionaryService } from '@/composables/dictionary.service'
 import { useTableStore } from '@/stores/tableStore'
 import { storeToRefs } from 'pinia'
@@ -123,6 +123,7 @@ const dragOptions = computed(() => {
   }
 })
 
+// TODO: only admins can reorder
 const handleReorder = async (tags: any[], word: string, wordId: number, isPhoneme: boolean) => {
   try {
     await reorderTags(word, String(wordId), tags, isPhoneme)
