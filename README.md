@@ -20,8 +20,10 @@
   - [ ] table with word, phonemes, phonograms, date added, Notes
   - [ ] Add remove and edit functionality
 
-## Just added the ability to search by phonemes and phonograms
+## Just added very basic login with middleware and vue router
 
+- No error handling
+- No signup page yet
 - Need to add a state for no results found
 - Need to add loading state
 

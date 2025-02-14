@@ -9,11 +9,9 @@ declare module 'vue' {
   export interface GlobalComponents {
     AddTagModal: typeof import('./src/components/table/AddTagModal.vue')['default']
     Button: typeof import('primevue/button')['default']
-    Checkbox: typeof import('primevue/checkbox')['default']
     Column: typeof import('primevue/column')['default']
     DataTable: typeof import('primevue/datatable')['default']
     Dialog: typeof import('primevue/dialog')['default']
-    Dropdown: typeof import('primevue/dropdown')['default']
     IconCommunity: typeof import('./src/components/icons/IconCommunity.vue')['default']
     IconDocumentation: typeof import('./src/components/icons/IconDocumentation.vue')['default']
     IconEcosystem: typeof import('./src/components/icons/IconEcosystem.vue')['default']
@@ -28,10 +26,8 @@ declare module 'vue' {
     RemoveTagModal: typeof import('./src/components/table/RemoveTagModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    Students: typeof import('./src/components/students/Students.vue')['default']
     Table: typeof import('./src/components/table/Table.vue')['default']
     TableContainer: typeof import('./src/components/table/TableContainer.vue')['default']
     Tag: typeof import('primevue/tag')['default']
-    Toast: typeof import('primevue/toast')['default']
   }
 }

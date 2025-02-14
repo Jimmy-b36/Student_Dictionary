@@ -36,7 +36,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useAuth } from '@/composables/auth.service'
 import { ref } from 'vue'
 const { login } = useAuth()
