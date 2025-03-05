@@ -2,12 +2,6 @@
 
 ## TODO
 
-- [✅] Enter the new dataset into the database
-- [✅] Improve the search functionality
-  - [✅] Create filters to enter words and view the phonemes and phonograms
-- [✅] For the search we should have different filters for words and phonemes/phonograms (phonemes/phonograms should have somesort of autocomplete)
-  - [✅] What would be better, an autocomplete or select from a list
-- [✅] Review error handling for adding and removing tags
 - [ ] Add state for no results found
 - [ ] Add loading state for table results loading
 - [ ] Add tests for the search functionality
@@ -19,6 +13,7 @@
 - [ ] Create student profile page for learnt words
   - [ ] table with word, phonemes, phonograms, date added, Notes
   - [ ] Add remove and edit functionality
+- [ ] Fix draggable, you should not be able to drag phonemes/phonograms into another word
 
 ## Just added very basic login with middleware and vue router
 
