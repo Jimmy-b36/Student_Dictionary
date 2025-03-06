@@ -2,6 +2,7 @@
 
 ## TODO
 
+- [✅] Fix draggable, you should not be able to drag phonemes/phonograms into another word
 - [ ] Add state for no results found
 - [ ] Add loading state for table results loading
 - [ ] Add tests for the search functionality
@@ -13,7 +14,6 @@
 - [ ] Create student profile page for learnt words
   - [ ] table with word, phonemes, phonograms, date added, Notes
   - [ ] Add remove and edit functionality
-- [ ] Fix draggable, you should not be able to drag phonemes/phonograms into another word
 
 ## Just added very basic login with middleware and vue router
 
@@ -23,6 +23,8 @@
 - Need to add loading state
 
 ## Notes
+
+What happens if 2 admins make changes at the same time?
 
 ## Requirements
 
