@@ -8,6 +8,7 @@
     :rowsPerPageOptions="[5, 10, 20]"
     showGridlines
     @page="onPageChange"
+    :loading="props.loading"
   >
     <Column field="word" header="Word" />
     <Column field="phonemes" header="Phonemes">
@@ -21,6 +22,7 @@
             class="flex flex-wrap gap-2"
             @start="drag = true"
             @end="drag = false"
+            :group="`${data.word} phonemes`"
           >
             <template #item="{ element }">
               <transition-group
@@ -60,6 +62,7 @@
             class="flex flex-wrap gap-2"
             @start="drag = true"
             @end="drag = false"
+            :group="`${data.word} phonograms`"
           >
             <template #item="{ element }">
               <transition-group
@@ -109,6 +112,7 @@ import draggable from 'vuedraggable'
 const tableStore = useTableStore()
 const { tableData } = storeToRefs(tableStore)
 const { reorderTags } = useDictionaryService()
+const props = defineProps(['loading'])
 
 const drag = ref(false)
 const toast = useToast()
