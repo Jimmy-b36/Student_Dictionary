@@ -29,5 +29,6 @@ declare module 'vue' {
     Table: typeof import('./src/components/table/Table.vue')['default']
     TableContainer: typeof import('./src/components/table/TableContainer.vue')['default']
     Tag: typeof import('primevue/tag')['default']
+    Toast: typeof import('primevue/toast')['default']
   }
 }

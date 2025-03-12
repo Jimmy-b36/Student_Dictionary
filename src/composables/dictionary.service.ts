@@ -1,55 +1,16 @@
+import { useSearchStore } from '@/stores/searchStore'
 import { useTableStore } from '@/stores/tableStore'
+import { debounce } from 'lodash-es'
 import { storeToRefs } from 'pinia'
-import { ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useDictionaryStore } from '../stores/dictionary'
 import { pb } from '../utils/pocketbaseConnection'
 
-interface IDictionaryResponse {
-  id: string
-  word: string
-  expand: {
-    'word_phonemes(word)': IWordPhoneme[]
-    'word_phonograms(word)': IWordPhonogram[]
-  }
-}
-
-interface IPhonemeResponse {
-  id: string
-  phoneme: string
-  expand: {
-    'word_phonemes(phoneme)': IWordPhoneme[]
-  }
-}
-
-interface IWordPhoneme {
-  expand: {
-    phoneme: { id: string; phoneme: string }
-    word: { word: string }
-  }
-}
-
-interface IWordPhonogram {
-  expand: {
-    phonogram: { id: string; phonogram: string }
-    word: { word: string }
-  }
-}
-
-export interface ITableHeaders {
-  id: string
-  word: string
-  phonemes: string[]
-  phonograms: string[]
-}
-
-export interface IDictionaryEntry {
-  wordId: string
-  phonemes: Set<{ id: string; phoneme: string }>
-  phonograms: Set<{ id: string; phonogram: string }>
-}
+const DEBOUNCE_TIMEOUT = 200
 
 export const useDictionaryService = () => {
   const { dictionary, phonemes, phonograms } = storeToRefs(useDictionaryStore())
+  const { searchState, numberOfActiveFilters } = storeToRefs(useSearchStore())
   const initialItemsCache = ref<Map<string, IDictionaryEntry>>(new Map())
 
   // -------------------
@@ -67,6 +28,7 @@ export const useDictionaryService = () => {
         })
       if (currentPage === 1) {
         initialItemsCache.value.clear()
+        dictionary.value.clear()
       }
 
       response.items.forEach(({ word, expand, id }) => {
@@ -122,8 +84,9 @@ export const useDictionaryService = () => {
   // -------------------
   // Search functions
   // -------------------
+  // Note: Main search functionality has been moved to search.service.ts
+  // Filter functions have been moved to search.service.ts
 
-  // TODO implement search
   const phonemeSearch = async (phonemeSearchArr: { id: string; phoneme: string }[]) => {
     if (phonemeSearchArr.length === 0) {
       // If no phonemes are selected, fetch all
@@ -165,6 +128,7 @@ export const useDictionaryService = () => {
         )
         if (hasAllPhonemes) {
           dictionary.value.set(word, { wordId, phonemes, phonograms })
+          searchState.value.initialResults.set(word, { wordId, phonemes, phonograms })
         }
       }
     })
@@ -213,11 +177,23 @@ export const useDictionaryService = () => {
         )
         if (hasAllPhonograms) {
           dictionary.value.set(word, { wordId, phonemes, phonograms })
+          searchState.value.initialResults.set(word, { wordId, phonemes, phonograms })
         }
       }
-
-      return res
     })
+    return res
+  }
+
+  const debouncedWordSearch = debounce(async (value: string) => {
+    try {
+      await searchDictionary(value)
+    } catch (error) {
+      console.error('Search error:', error)
+    }
+  }, DEBOUNCE_TIMEOUT)
+
+  const wordSearch = async (searchParam: string) => {
+    debouncedWordSearch(searchParam)
   }
 
   const searchDictionary = async (searchParam: string) => {
@@ -237,12 +213,14 @@ export const useDictionaryService = () => {
     }
 
     try {
+      const uniqueKey = `${searchParam}_${Date.now()}`
       // Word search
       const result = await pb.collection('global_dictionary').getList<IDictionaryResponse>(1, 30, {
         filter: `word~"${searchParam}"`,
         expand: 'word_phonograms(word).phonogram,word_phonemes(word).phoneme',
         fields:
-          'id, word,expand.word_phonograms(word).expand.phonogram,expand.word_phonemes(word).expand.phoneme'
+          'id, word,expand.word_phonograms(word).expand.phonogram,expand.word_phonemes(word).expand.phoneme',
+        requestKey: uniqueKey
       })
 
       if (result.items.length) {
@@ -252,6 +230,11 @@ export const useDictionaryService = () => {
             (phonogram) => phonogram.expand.phonogram
           )
           dictionary.value.set(word, {
+            wordId: id,
+            phonemes: new Set(phonemes ?? []),
+            phonograms: new Set(phonograms ?? [])
+          })
+          searchState.value.initialResults.set(word, {
             wordId: id,
             phonemes: new Set(phonemes ?? []),
             phonograms: new Set(phonograms ?? [])
@@ -274,7 +257,6 @@ export const useDictionaryService = () => {
     try {
       const res = await pb.collection(collection).delete(id)
       if (res === true) {
-        console.log('🥶 Successfully deleted', message)
         return true
       }
       return false
@@ -358,12 +340,10 @@ export const useDictionaryService = () => {
     if (isPhoneme) entry.phonemes.add(tagWithCorrectKey as { id: string; phoneme: string })
     else entry.phonograms.add(tagWithCorrectKey as { id: string; phonogram: string })
     try {
-      pb.autoCancellation(false)
       await pb.collection(collection).create({
         word: wordId,
         [tagKey]: tag.id
       })
-      pb.autoCancellation(true)
       return {
         type: 'success',
         message: `Successfully added ${tag[tagKey]} to ${word}`
@@ -407,14 +387,12 @@ export const useDictionaryService = () => {
       }
 
       // Create new associations in order
-      pb.autoCancellation(false)
       for (const tag of tags) {
         await pb.collection(collection).create({
           word: wordId,
           [tagKey]: tag.id
         })
       }
-      pb.autoCancellation(true)
     } catch (error) {
       // Restore original state if an error occurs
       if (isPhoneme) {
@@ -429,7 +407,7 @@ export const useDictionaryService = () => {
 
   return {
     getDictionaryPage,
-    searchDictionary,
+    wordSearch,
     removeTagFromWord,
     addTagToWord,
     fetchAllPhonemes,
@@ -438,4 +416,40 @@ export const useDictionaryService = () => {
     phonogramSearch,
     reorderTags
   }
+}
+
+interface IDictionaryResponse {
+  id: string
+  word: string
+  expand: {
+    'word_phonemes(word)': IWordPhoneme[]
+    'word_phonograms(word)': IWordPhonogram[]
+  }
+}
+
+interface IWordPhoneme {
+  expand: {
+    phoneme: { id: string; phoneme: string }
+    word: { word: string }
+  }
+}
+
+interface IWordPhonogram {
+  expand: {
+    phonogram: { id: string; phonogram: string }
+    word: { word: string }
+  }
+}
+
+export interface ITableHeaders {
+  id: string
+  word: string
+  phonemes: string[]
+  phonograms: string[]
+}
+
+export interface IDictionaryEntry {
+  wordId: string
+  phonemes: Set<{ id: string; phoneme: string }>
+  phonograms: Set<{ id: string; phonogram: string }>
 }
