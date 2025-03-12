@@ -10,6 +10,7 @@
     @page="onPageChange"
     :loading="props.loading"
   >
+    <template #empty> No results found. </template>
     <Column field="word" header="Word" />
     <Column field="phonemes" header="Phonemes">
       <template #body="{ data }">
@@ -102,6 +103,7 @@
 <script setup lang="ts">
 import dragHandle from '@/assets/drag-handle-svgrepo-com.svg?url'
 import { useDictionaryService } from '@/composables/dictionary.service'
+import { useSearchStore } from '@/stores/searchStore'
 import { useTableStore } from '@/stores/tableStore'
 import { storeToRefs } from 'pinia'
 import { type DataTablePageEvent } from 'primevue/datatable'
@@ -112,6 +114,8 @@ import draggable from 'vuedraggable'
 const tableStore = useTableStore()
 const { tableData } = storeToRefs(tableStore)
 const { reorderTags } = useDictionaryService()
+const { hasActiveFilters } = storeToRefs(useSearchStore())
+
 const props = defineProps(['loading'])
 
 const drag = ref(false)
@@ -142,6 +146,10 @@ const handleReorder = async (tags: any[], word: string, wordId: number, isPhonem
 }
 
 const onPageChange = (page: DataTablePageEvent) => {
+  // check for filters?
+  if (hasActiveFilters.value) {
+    return
+  }
   const totalFetchItems = 100
   // adjusted page number for pre fetching
   const adjustedPage = Math.floor((page.first + page.rows) / totalFetchItems)

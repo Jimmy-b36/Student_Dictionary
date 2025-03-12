@@ -15,12 +15,13 @@
   - [ ] table with word, phonemes, phonograms, date added, Notes
   - [ ] Add remove and edit functionality
 
-## Just added very basic login with middleware and vue router
+## Just implemented a more robust search functionality
 
-- No error handling
+- Implements some auto tests
+- No error handling for login
 - No signup page yet
-- Need to add a state for no results found
-- Need to add loading state
+- Need to add a state for no results found for table
+- Need to add loading state for table
 
 ## Notes
 
