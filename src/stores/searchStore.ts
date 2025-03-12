@@ -40,8 +40,8 @@ export const useSearchStore = defineStore('search', () => {
   const hasResults = computed(() => searchState.filteredResults !== null)
   const hasActiveFilters = computed(
     () =>
-      searchState.currentFilters.phoneme?.size > 0 ||
-      searchState.currentFilters.phonogram?.size > 0 ||
+      (searchState.currentFilters.phoneme?.size ?? 0 > 0) ||
+      (searchState.currentFilters.phonogram?.size ?? 0 > 0) ||
       !!searchState.currentFilters.word
   )
   const activeFiltersCount = computed(() => {

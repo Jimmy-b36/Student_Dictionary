@@ -10,7 +10,7 @@ const DEBOUNCE_TIMEOUT = 200
 
 export const useDictionaryService = () => {
   const { dictionary, phonemes, phonograms } = storeToRefs(useDictionaryStore())
-  const { searchState, numberOfActiveFilters } = storeToRefs(useSearchStore())
+  const { searchState } = storeToRefs(useSearchStore())
   const initialItemsCache = ref<Map<string, IDictionaryEntry>>(new Map())
 
   // -------------------
