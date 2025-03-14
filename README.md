@@ -3,11 +3,12 @@
 ## TODO
 
 - [✅] Fix draggable, you should not be able to drag phonemes/phonograms into another word
-- [ ] Add state for no results found
-- [ ] Add loading state for table results loading
+- [✅] Add state for no results found
+- [✅] Add loading state for table results loading
 - [ ] Add tests for the search functionality
 - [ ] Add tests for adding and removing tags
 - [ ] Login functionality
+  - [✅] Basic login
   - [ ] How many different users do we need? [Admin, Teacher, Student]
   - [ ] Do I need a middleware or will Pocketbase handle it?
   - [ ] Need to save a token to storage so I don't have to login each time
@@ -24,8 +25,6 @@
 - Need to add loading state for table
 
 ## Notes
-
-What happens if 2 admins make changes at the same time?
 
 ## Requirements
 

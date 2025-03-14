@@ -3,8 +3,6 @@ import { defineStore } from 'pinia'
 import { computed, reactive } from 'vue'
 
 interface ISearchState {
-  currentSearchType: 'word' | 'phoneme' | 'phonogram' | ''
-  initialSearchType: 'word' | 'phoneme' | 'phonogram' | ''
   filteredResults: Map<string, IDictionaryEntry> | null
   currentFilters: {
     phoneme: Set<{ id: string; phoneme: string }> | null
@@ -18,9 +16,6 @@ interface ISearchState {
 
 export const useSearchStore = defineStore('search', () => {
   const searchState = reactive<ISearchState>({
-    currentSearchType: '',
-    // if we are no longer using the initial search type, then we should change the initial to whatever the filter is
-    initialSearchType: '',
     filteredResults: null,
 
     currentFilters: {
@@ -51,15 +46,11 @@ export const useSearchStore = defineStore('search', () => {
     )
   })
 
-  // Tracking if the initial search has been done
-  const initialSearchComplete = computed(() => !!searchState.currentSearchType)
-
   return {
     searchState,
     isSearching,
     hasResults,
     hasActiveFilters,
-    initialSearchComplete,
     activeFiltersCount
   }
 })
