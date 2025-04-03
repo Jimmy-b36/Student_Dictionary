@@ -19,13 +19,18 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       component: LoginView
+    },
+    {
+      path: '/admin/login',
+      name: 'AdminLogin',
+      component: LoginView
     }
   ]
 })
 
 router.beforeEach((to, from) => {
   // check if the user is authenticated
-  if (to.name !== 'Login') {
+  if (to.name !== 'Login' && to.name !== 'AdminLogin') {
     const isAuth = checkAuth()
     if (!isAuth) return { name: 'Login' }
   }
