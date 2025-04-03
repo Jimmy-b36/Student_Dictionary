@@ -1,25 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useSearchService } from '../search.service'
 import { useDictionaryStore } from '@/stores/dictionary'
 import { useSearchStore } from '@/stores/searchStore'
-import { setActivePinia, createPinia } from 'pinia'
+import { createPinia, setActivePinia } from 'pinia'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { useSearchService } from '../search.service'
 
 // Create dedicated spies
-const getDictionaryPageSpy = vi.fn().mockImplementation(async () => {
-  console.log('🔥 Mock getDictionaryPage called')
-})
+const getDictionaryPageSpy = vi.fn().mockImplementation(async () => {})
 
-const wordSearchSpy = vi.fn().mockImplementation(async () => {
-  console.log('🔥 Mock wordSearch called')
-})
+const wordSearchSpy = vi.fn().mockImplementation(async () => {})
 
-const phonemeSearchSpy = vi.fn().mockImplementation(async () => {
-  console.log('🔥 Mock phonemeSearch called')
-})
+const phonemeSearchSpy = vi.fn().mockImplementation(async () => {})
 
-const phonogramSearchSpy = vi.fn().mockImplementation(async () => {
-  console.log('🔥 Mock phonogramSearch called')
-})
+const phonogramSearchSpy = vi.fn().mockImplementation(async () => {})
 
 // Mock the dictionary service
 vi.mock('../dictionary.service', () => ({

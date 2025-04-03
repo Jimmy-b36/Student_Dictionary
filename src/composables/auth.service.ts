@@ -1,39 +1,72 @@
-import { pb } from '../utils/pocketbaseConnection'
+import { pb } from '@/utils/pocketbaseConnection'
+import { useToast } from 'primevue/usetoast'
 export const useAuth = () => {
+  const toast = useToast()
   const login = async (email: string, password: string) => {
-    let authData
     try {
-      authData = await pb.admins.authWithPassword(email, password)
-      if (authData) {
-        return authData
-      }
-
-      authData = await pb.collection('users').authWithPassword(email, password)
-      return authData
-    } catch (error) {
-      console.log('🚀 ~ login ~ error:', error)
+      return await pb.collection('users').authWithPassword(email, password)
+    } catch (error: any) {
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Incorrect email or password',
+        life: 3000
+      })
+      return false
     }
   }
 
-  const signup = async (email: string, password: string) => {
+  const adminLogin = async (email: string, password: string) => {
     try {
-      const authData = await pb.admins.create({ email, password })
-      return authData
-    } catch (error) {
-      console.log('🚀 ~ signup ~ error:', error)
+      return await pb.admins.authWithPassword(email, password)
+    } catch (error: any) {
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Incorrect email or password',
+        life: 3000
+      })
+      return false
+    }
+  }
+
+  const signup = async (email: string, password: string, confirmPassword: string) => {
+    try {
+      const authData = await pb
+        .collection('users')
+        .create({ email, password, passwordConfirm: confirmPassword })
+      if (authData) {
+        await login(email, password)
+        return true
+      }
+      return false
+    } catch (error: any) {
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error.message || 'Failed to signup',
+        life: 3000
+      })
+      return false
     }
   }
 
   const logout = async () => {
     try {
       await pb.authStore.clear()
-    } catch (error) {
-      console.log('🚀 ~ logout ~ error:', error)
+    } catch (error: any) {
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error.message || 'Failed to logout',
+        life: 3000
+      })
     }
   }
 
   return {
     login,
+    adminLogin,
     signup,
     logout
   }
