@@ -26,6 +26,7 @@ declare module 'vue' {
     RemoveTagModal: typeof import('./src/components/table/RemoveTagModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Signup: typeof import('./src/components/auth/Signup.vue')['default']
     Table: typeof import('./src/components/table/Table.vue')['default']
     TableContainer: typeof import('./src/components/table/TableContainer.vue')['default']
     Tag: typeof import('primevue/tag')['default']

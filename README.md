@@ -9,6 +9,7 @@
 - [ ] Add tests for adding and removing tags
 - [ ] Login functionality
   - [✅] Basic login
+  - [✅] Add a signup page
   - [ ] How many different users do we need? [Admin, Teacher, Student]
   - [ ] Do I need a middleware or will Pocketbase handle it?
   - [ ] Need to save a token to storage so I don't have to login each time
