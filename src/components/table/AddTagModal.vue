@@ -1,5 +1,11 @@
 <template>
-  <Button icon="pi pi-plus" severity="secondary" rounded @click="visible = true" />
+  <Button
+    icon="pi pi-plus"
+    severity="secondary"
+    rounded
+    @click="visible = true"
+    :class="!props.isAdmin && '!hidden'"
+  />
 
   <Dialog v-model:visible="visible" modal :style="{ width: '25rem' }">
     <template #header>
@@ -52,7 +58,7 @@ import { useDictionaryStore } from '@/stores/dictionary'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch } from 'vue'
 
-const props = defineProps(['word', 'wordId', 'isPhoneme'])
+const props = defineProps(['word', 'wordId', 'isPhoneme', 'isAdmin'])
 const { phonemes, phonograms } = storeToRefs(useDictionaryStore())
 const { addTagToWord } = useDictionaryService()
 

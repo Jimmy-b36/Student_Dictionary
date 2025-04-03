@@ -4,6 +4,7 @@
     icon="pi pi-times"
     variant="text"
     class="p-button-rounded p-button-danger close p-2"
+    :class="!props.isAdmin && '!hidden'"
     @click="visible = true"
     :disabled="loading"
   ></Button>
@@ -46,7 +47,7 @@
 import { useDictionaryService } from '@/composables/dictionary.service'
 
 import { ref } from 'vue'
-const props = defineProps(['word', 'tag', 'tagId', 'isPhoneme', 'wordId'])
+const props = defineProps(['word', 'tag', 'tagId', 'isPhoneme', 'wordId', 'isAdmin'])
 const { removeTagFromWord } = useDictionaryService()
 const visible = ref(false)
 const errorMessage = ref<string>('')

@@ -1,5 +1,5 @@
 <template>
-  <Toast />
+  <Toast position="top-left" />
   <DataTable
     :value="tableData"
     paginator
@@ -24,6 +24,7 @@
             @start="drag = true"
             @end="drag = false"
             :group="`${data.word} phonemes`"
+            :disabled="!isAdmin"
           >
             <template #item="{ element }">
               <transition-group
@@ -34,7 +35,12 @@
               >
                 <Tag :key="element.id" severity="info" rounded class="!items-center">
                   <template #icon>
-                    <img :src="dragHandle" alt="drag handle" class="h-5 w-5" />
+                    <img
+                      :src="dragHandle"
+                      alt="drag handle"
+                      class="h-5 w-5"
+                      :class="!isAdmin && '!hidden'"
+                    />
                     <span class="mr-1 text-lg">{{ element.phoneme }}</span>
                     <RemoveTagModal
                       :word="data.word"
@@ -42,13 +48,19 @@
                       :tag="element.phoneme"
                       :tag-id="element.id"
                       :is-phoneme="true"
+                      :is-admin="isAdmin"
                     />
                   </template>
                 </Tag>
               </transition-group>
             </template>
           </draggable>
-          <AddTagModal :word="data.word" :word-id="data.id" :is-phoneme="true" />
+          <AddTagModal
+            :word="data.word"
+            :word-id="data.id"
+            :is-phoneme="true"
+            :is-admin="isAdmin"
+          />
         </div>
       </template>
     </Column>
@@ -64,6 +76,7 @@
             @start="drag = true"
             @end="drag = false"
             :group="`${data.word} phonograms`"
+            :disabled="!isAdmin"
           >
             <template #item="{ element }">
               <transition-group
@@ -79,7 +92,12 @@
                   class="!items-center !justify-center"
                 >
                   <template #icon>
-                    <img :src="dragHandle" alt="drag handle" class="h-5 w-5" />
+                    <img
+                      :src="dragHandle"
+                      alt="drag handle"
+                      class="h-5 w-5"
+                      :class="!isAdmin && '!hidden'"
+                    />
                     <span class="mx-1 text-lg">{{ element.phonogram }}</span>
                     <RemoveTagModal
                       :word="data.word"
@@ -87,13 +105,19 @@
                       :tag="element.phonogram"
                       :tag-id="element.id"
                       :is-phoneme="false"
+                      :is-admin="isAdmin"
                     />
                   </template>
                 </Tag>
               </transition-group>
             </template>
           </draggable>
-          <AddTagModal :word="data.word" :word-id="data.id" :is-phoneme="false" />
+          <AddTagModal
+            :word="data.word"
+            :word-id="data.id"
+            :is-phoneme="false"
+            :is-admin="isAdmin"
+          />
         </div>
       </template>
     </Column>
@@ -105,6 +129,7 @@ import dragHandle from '@/assets/drag-handle-svgrepo-com.svg?url'
 import { useDictionaryService } from '@/composables/dictionary.service'
 import { useSearchStore } from '@/stores/searchStore'
 import { useTableStore } from '@/stores/tableStore'
+import { pb } from '@/utils/pocketbaseConnection'
 import { storeToRefs } from 'pinia'
 import { type DataTablePageEvent } from 'primevue/datatable'
 import { useToast } from 'primevue/usetoast'
@@ -120,6 +145,7 @@ const props = defineProps(['loading'])
 
 const drag = ref(false)
 const toast = useToast()
+const isAdmin = pb.authStore.isAdmin
 
 const dragOptions = computed(() => {
   return {

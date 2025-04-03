@@ -1,7 +1,9 @@
 <template>
   <div class="flex justify-center items-center min-h-screen bg-gray-100">
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-      <h1 class="text-2xl font-bold text-center text-gray-700 mb-6">Login</h1>
+      <h1 class="text-2xl font-bold text-center text-gray-700 mb-6">
+        {{ props.isAdminLogin ? 'Admin' : '' }} Login
+      </h1>
       <form @submit.prevent="handleSubmit">
         <div class="space-y-4">
           <div>
@@ -32,24 +34,42 @@
           />
         </div>
       </form>
+      <slot name="toggleSignup"></slot>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useAuth } from '@/composables/auth.service'
+import { useToast } from 'primevue/usetoast'
 import { ref } from 'vue'
-const { login } = useAuth()
-
 import { useRouter } from 'vue-router'
+const { login, adminLogin } = useAuth()
 
 const router = useRouter()
+const toast = useToast()
+
+const props = defineProps(['isAdminLogin'])
 
 const email = ref('')
 const password = ref('')
 
 const handleSubmit = async () => {
-  await login(email.value, password.value)
-  router.push('/home')
+  try {
+    if (props.isAdminLogin) {
+      const success = await adminLogin(email.value, password.value)
+      success && router.push('/home')
+    } else {
+      const success = await login(email.value, password.value)
+      success && router.push('/home')
+    }
+  } catch (error: any) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: error.message || 'Failed to login',
+      life: 3000
+    })
+  }
 }
 </script>
