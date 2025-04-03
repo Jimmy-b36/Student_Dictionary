@@ -10,7 +10,7 @@ const USER_PASSWORD = process.env.POCKETBASE_TEST_USER_PASSWORD || ''
 // Create dedicated spies
 const loginSpy = vi.fn().mockImplementation(async (email, password) => {
   try {
-    const authData = await pb.collection('users').authWithPassword(email, password)
+    const authData = await pb.collection('teachers').authWithPassword(email, password)
     return authData
   } catch (error) {
     return error
@@ -27,7 +27,7 @@ const adminLoginSpy = vi.fn().mockImplementation(async (email, password) => {
 })
 
 const signupSpy = vi.fn().mockImplementation(async (email, password, confirmPassword) => {
-  const authData = await pb.collection('users').create({
+  const authData = await pb.collection('teachers').create({
     email,
     password,
     passwordConfirm: confirmPassword
@@ -109,7 +109,7 @@ describe('Auth Service', () => {
 
     afterEach(async () => {
       // Delete user so that it doesn't affect other tests
-      await pb.collection('users').delete(userId)
+      await pb.collection('teachers').delete(userId)
       pb.authStore.clear()
     })
 

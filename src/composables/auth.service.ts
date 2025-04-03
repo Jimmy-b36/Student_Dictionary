@@ -4,7 +4,7 @@ export const useAuth = () => {
   const toast = useToast()
   const login = async (email: string, password: string) => {
     try {
-      return await pb.collection('users').authWithPassword(email, password)
+      return await pb.collection('teachers').authWithPassword(email, password)
     } catch (error: any) {
       toast.add({
         severity: 'error',
@@ -33,7 +33,7 @@ export const useAuth = () => {
   const signup = async (email: string, password: string, confirmPassword: string) => {
     try {
       const authData = await pb
-        .collection('users')
+        .collection('teachers')
         .create({ email, password, passwordConfirm: confirmPassword })
       if (authData) {
         await login(email, password)
