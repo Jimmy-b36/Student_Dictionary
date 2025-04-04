@@ -1,8 +1,6 @@
 <template>
-  <div class="app-container">
-    <Navbar v-if="showNavbar" />
-    <RouterView />
-  </div>
+  <Navbar v-if="showNavbar" />
+  <RouterView />
 </template>
 
 <script setup lang="ts">
