@@ -1,5 +1,19 @@
 <template>
-  <Toast position="top-left" />
+  <Toast position="top-left">
+    <template #message="slotProps">
+      <div class="flex flex-col w-full">
+        <div class="font-medium text-lg">{{ slotProps.message.summary }}</div>
+        <p>{{ slotProps.message.detail }}</p>
+        <Button
+          v-if="slotProps.message.link"
+          label="Go to Students Dictionary"
+          icon="pi pi-book"
+          class="p-button-sm mt-2 w-2/3"
+          @click="() => router.push(slotProps.message.link)"
+        ></Button>
+      </div>
+    </template>
+  </Toast>
   <DataTable
     :value="tableData"
     paginator
@@ -147,7 +161,10 @@ import { storeToRefs } from 'pinia'
 import { type DataTablePageEvent } from 'primevue/datatable'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import draggable from 'vuedraggable'
+
+const router = useRouter()
 
 const tableStore = useTableStore()
 const { tableData } = storeToRefs(tableStore)
