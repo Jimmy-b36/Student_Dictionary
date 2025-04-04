@@ -141,7 +141,15 @@ export function useStudentService() {
       loading.value = true
       error.value = null
 
-      const res = await pb.collection('students').delete(id)
+      const hasAccess = await checkTeacherAccess(id)
+      if (!hasAccess) {
+        throw new Error('Unauthorized access to student dictionary')
+      }
+
+      const teacher_students_id = await pb
+        .collection('teacher_students')
+        .getFirstListItem(`student_id = "${id}"`)
+      const res = await pb.collection('teacher_students').delete(teacher_students_id.id)
 
       students.value = students.value.filter((s) => s.id !== id)
 
