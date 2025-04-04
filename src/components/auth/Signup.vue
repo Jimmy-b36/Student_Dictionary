@@ -57,13 +57,13 @@
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '@/composables/auth.service'
+import { useAuthService } from '@/composables/auth.service'
 import { useToast } from 'primevue/usetoast'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const { signup } = useAuth()
+const { signup } = useAuthService()
 const toast = useToast()
 const isSubmitting = ref(false)
 
