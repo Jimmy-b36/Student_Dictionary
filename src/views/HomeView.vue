@@ -1,8 +1,5 @@
 <template>
   <div class="container py-10 mx-auto">
-    <div class="flex justify-end mb-4">
-      <Logout />
-    </div>
     <TableContainer />
   </div>
 </template>

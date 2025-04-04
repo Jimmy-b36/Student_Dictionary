@@ -7,11 +7,18 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AddStudentModal: typeof import('./src/components/teachers/AddStudentModal.vue')['default']
     AddTagModal: typeof import('./src/components/table/AddTagModal.vue')['default']
+    AddToStudentDictionary: typeof import('./src/components/students/AddToStudentDictionary.vue')['default']
     Button: typeof import('primevue/button')['default']
     Column: typeof import('primevue/column')['default']
     DataTable: typeof import('primevue/datatable')['default']
+    DeleteStudentModal: typeof import('./src/components/teachers/DeleteStudentModal.vue')['default']
+    DeleteWordModal: typeof import('./src/components/students/DeleteWordModal.vue')['default']
     Dialog: typeof import('primevue/dialog')['default']
+    Dropdown: typeof import('primevue/dropdown')['default']
+    EditNotesModal: typeof import('./src/components/students/EditNotesModal.vue')['default']
+    EditStudentModal: typeof import('./src/components/teachers/EditStudentModal.vue')['default']
     IconCommunity: typeof import('./src/components/icons/IconCommunity.vue')['default']
     IconDocumentation: typeof import('./src/components/icons/IconDocumentation.vue')['default']
     IconEcosystem: typeof import('./src/components/icons/IconEcosystem.vue')['default']
@@ -20,16 +27,27 @@ declare module 'vue' {
     InputText: typeof import('primevue/inputtext')['default']
     Login: typeof import('./src/components/auth/Login.vue')['default']
     Logout: typeof import('./src/components/auth/Logout.vue')['default']
+    Menubar: typeof import('primevue/menubar')['default']
     Message: typeof import('primevue/message')['default']
     MultiSelect: typeof import('primevue/multiselect')['default']
+    Navbar: typeof import('./src/components/layout/Navbar.vue')['default']
     Password: typeof import('primevue/password')['default']
+    ProgressSpinner: typeof import('primevue/progressspinner')['default']
+    Rating: typeof import('primevue/rating')['default']
     RemoveTagModal: typeof import('./src/components/table/RemoveTagModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Signup: typeof import('./src/components/auth/Signup.vue')['default']
+    StudentHeader: typeof import('./src/components/students/StudentHeader.vue')['default']
+    StudentWordTable: typeof import('./src/components/students/StudentWordTable.vue')['default']
     Table: typeof import('./src/components/table/Table.vue')['default']
     TableContainer: typeof import('./src/components/table/TableContainer.vue')['default']
     Tag: typeof import('primevue/tag')['default']
+    TeacherTable: typeof import('./src/components/teachers/TeacherTable.vue')['default']
+    Textarea: typeof import('primevue/textarea')['default']
     Toast: typeof import('primevue/toast')['default']
+  }
+  export interface ComponentCustomProperties {
+    Tooltip: typeof import('primevue/tooltip')['default']
   }
 }

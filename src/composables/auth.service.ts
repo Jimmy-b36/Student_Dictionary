@@ -1,7 +1,9 @@
 import { pb } from '@/utils/pocketbaseConnection'
 import { useToast } from 'primevue/usetoast'
-export const useAuth = () => {
+import { useRouter } from 'vue-router'
+export const useAuthService = () => {
   const toast = useToast()
+  const router = useRouter()
   const login = async (email: string, password: string) => {
     try {
       return await pb.collection('teachers').authWithPassword(email, password)
@@ -53,7 +55,8 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
-      await pb.authStore.clear()
+      pb.authStore.clear()
+      router.push('/login')
     } catch (error: any) {
       toast.add({
         severity: 'error',

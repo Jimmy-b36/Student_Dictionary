@@ -40,11 +40,11 @@
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '@/composables/auth.service'
+import { useAuthService } from '@/composables/auth.service'
 import { useToast } from 'primevue/usetoast'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-const { login, adminLogin } = useAuth()
+const { login, adminLogin } = useAuthService()
 
 const router = useRouter()
 const toast = useToast()

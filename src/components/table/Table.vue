@@ -1,5 +1,19 @@
 <template>
-  <Toast position="top-left" />
+  <Toast position="top-left">
+    <template #message="slotProps">
+      <div class="flex flex-col w-full">
+        <div class="font-medium text-lg">{{ slotProps.message.summary }}</div>
+        <p>{{ slotProps.message.detail }}</p>
+        <Button
+          v-if="slotProps.message.link"
+          label="Go to Students Dictionary"
+          icon="pi pi-book"
+          class="p-button-sm mt-2 w-2/3"
+          @click="() => router.push(slotProps.message.link)"
+        ></Button>
+      </div>
+    </template>
+  </Toast>
   <DataTable
     :value="tableData"
     paginator
@@ -14,7 +28,7 @@
     <Column field="word" header="Word" />
     <Column field="phonemes" header="Phonemes">
       <template #body="{ data }">
-        <div class="flex flex-wrap gap-2" :class="`${drag ? 'cursor-grabbing' : 'cursor-grab'}`">
+        <div class="flex flex-wrap gap-2">
           <draggable
             v-model="data.phonemes"
             v-bind="dragOptions"
@@ -66,7 +80,7 @@
     </Column>
     <Column field="phonograms" header="Phonograms">
       <template #body="{ data }">
-        <div class="flex flex-wrap gap-2" :class="`${drag ? 'cursor-grabbing' : 'cursor-grab'}`">
+        <div class="flex flex-wrap gap-2">
           <draggable
             v-model="data.phonograms"
             v-bind="dragOptions"
@@ -121,6 +135,19 @@
         </div>
       </template>
     </Column>
+    <Column
+      field="actions"
+      header="Actions"
+      center
+      style="max-width: 11rem"
+      :header-style="{ textAlign: 'center' }"
+    >
+      <template #body="{ data }">
+        <div class="flex gap-2 justify-center">
+          <AddToStudentDictionary :word="data" />
+        </div>
+      </template>
+    </Column>
   </DataTable>
 </template>
 
@@ -134,7 +161,10 @@ import { storeToRefs } from 'pinia'
 import { type DataTablePageEvent } from 'primevue/datatable'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import draggable from 'vuedraggable'
+
+const router = useRouter()
 
 const tableStore = useTableStore()
 const { tableData } = storeToRefs(tableStore)
