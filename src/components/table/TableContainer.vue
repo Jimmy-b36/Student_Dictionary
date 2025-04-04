@@ -30,16 +30,18 @@
 
 <script setup lang="ts">
 import { useSearchService } from '@/composables/search.service'
+import { useStudentService } from '@/composables/student.service'
 import { useDictionaryStore } from '@/stores/dictionary'
 import { useSearchStore } from '@/stores/searchStore'
 
 import { storeToRefs } from 'pinia'
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 const searchStore = useSearchStore()
 const { searchState, isSearching } = storeToRefs(searchStore)
 const { phonemes, phonograms } = storeToRefs(useDictionaryStore())
 const { search } = useSearchService()
+const studentService = useStudentService()
 
 const phonemeSearchParams = ref<{ id: string; phoneme: string }[]>([])
 const phonogramSearchParams = ref<{ id: string; phonogram: string }[]>([])
@@ -63,6 +65,14 @@ const handleSearchParamChange = <T,>(
     search()
   }
 }
+
+onMounted(async () => {
+  try {
+    await studentService.fetchStudents()
+  } catch (error) {
+    console.log('🥶', error)
+  }
+})
 
 watch(wordSearchParams, (value) => {
   handleSearchParamChange('word', value, (val) => val === '')

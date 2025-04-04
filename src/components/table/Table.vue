@@ -14,7 +14,7 @@
     <Column field="word" header="Word" />
     <Column field="phonemes" header="Phonemes">
       <template #body="{ data }">
-        <div class="flex flex-wrap gap-2" :class="`${drag ? 'cursor-grabbing' : 'cursor-grab'}`">
+        <div class="flex flex-wrap gap-2">
           <draggable
             v-model="data.phonemes"
             v-bind="dragOptions"
@@ -66,7 +66,7 @@
     </Column>
     <Column field="phonograms" header="Phonograms">
       <template #body="{ data }">
-        <div class="flex flex-wrap gap-2" :class="`${drag ? 'cursor-grabbing' : 'cursor-grab'}`">
+        <div class="flex flex-wrap gap-2">
           <draggable
             v-model="data.phonograms"
             v-bind="dragOptions"
@@ -118,6 +118,19 @@
             :is-phoneme="false"
             :is-admin="isAdmin"
           />
+        </div>
+      </template>
+    </Column>
+    <Column
+      field="actions"
+      header="Actions"
+      center
+      style="max-width: 11rem"
+      :header-style="{ textAlign: 'center' }"
+    >
+      <template #body="{ data }">
+        <div class="flex gap-2 justify-center">
+          <AddToStudentDictionary :word="data" />
         </div>
       </template>
     </Column>
