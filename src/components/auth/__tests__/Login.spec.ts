@@ -1,14 +1,14 @@
 import Login from '@/components/auth/Login.vue' // Component to test
-import { useAuth } from '@/composables/auth.service' // Mock this
+import { useAuthService } from '@/composables/auth.service' // Mock this
 import { shallowMount, VueWrapper } from '@vue/test-utils'
 import ToastService from 'primevue/toastservice' // Import ToastService
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-// --- Mock useAuth ---
+// --- Mock useAuthService ---
 const mockLogin = vi.fn()
 const mockAdminLogin = vi.fn()
 vi.mock('@/composables/auth.service', () => ({
-  useAuth: vi.fn(() => ({
+  useAuthService: vi.fn(() => ({
     login: mockLogin,
     adminLogin: mockAdminLogin
   }))
@@ -24,7 +24,8 @@ vi.mock('vue-router', () => ({
 // --- Mock PrimeVue Components ---
 // Simple stubs to avoid warnings/errors during shallowMount
 const InputText = {
-  template: '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+  template:
+    '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
   props: ['modelValue'],
   emits: ['update:modelValue']
 }
