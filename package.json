@@ -25,6 +25,7 @@
     "primeicons": "^7.0.0",
     "primevue": "^4.2.5",
     "tailwindcss-primeui": "^0.3.4",
+    "uuid": "^11.1.0",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3",
     "vuedraggable": "^4.1.0"
