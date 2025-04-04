@@ -1,6 +1,9 @@
 import { checkAuth } from '@/router/middleware'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
+
+import StudentView from '@/views/student/StudentView.vue'
+import TeacherView from '@/views/TeacherView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -24,6 +27,16 @@ const router = createRouter({
       path: '/admin/login',
       name: 'AdminLogin',
       component: LoginView
+    },
+    {
+      path: '/home/student/:id',
+      name: 'Student',
+      component: StudentView
+    },
+    {
+      path: '/home/teacher',
+      name: 'Teacher',
+      component: TeacherView
     }
   ]
 })
