@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { pb } from '@/utils/pocketbaseConnection'
 import { type AdminAuthResponse, type RecordAuthResponse } from 'pocketbase'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -67,14 +68,13 @@ describe('Auth Service', () => {
     it('should return auth data on a successful login', async () => {
       const authData = await authService.login(USER_EMAIL, USER_PASSWORD)
       expect(authData).toBeDefined()
-      // @ts-ignore
-      expect(authData?.record?.email).toBe(USER_EMAIL)
+      expect((authData as RecordAuthResponse)?.record?.email).toBe(USER_EMAIL)
     })
 
     it('should return 400 on failed login', async () => {
       const res = await authService.login('email', 'password')
-      expect(res.response.code).toBe(400)
-      expect(res.message).toBe('Failed to authenticate.')
+      expect(res?.response?.code).toBe(400)
+      expect(res?.message).toBe('Failed to authenticate.')
     })
   })
 

@@ -103,6 +103,7 @@
 <script setup lang="ts">
 import { useStudentService, type IStudent } from '@/composables/student.service'
 import { pb } from '@/utils/pocketbaseConnection'
+import type { ToastMessageOptions } from 'primevue'
 import { useToast } from 'primevue/usetoast'
 import { defineProps, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -155,7 +156,7 @@ const addWordToStudent = async () => {
       detail: `Added "${props.word.word}" to ${selectedStudent.value.display_name}'s dictionary`,
       link: `/home/student/${selectedStudent.value.id}`,
       life: 3000
-    })
+    } as IToastMessage)
 
     selectedStudent.value = null
     notes.value = ''
@@ -173,6 +174,10 @@ const addWordToStudent = async () => {
 const navigateToTeacherView = () => {
   router.push('/home/teacher')
   showDialog.value = false
+}
+
+interface IToastMessage extends ToastMessageOptions {
+  link?: string
 }
 </script>
 
