@@ -1,10 +1,3 @@
-// Create Student
-//    - Needs a dict linked to them
-// Fetch Student
-// Update Student
-// Delete Student
-//    - Cascade delete dict
-
 import { pb } from '@/utils/pocketbaseConnection'
 import { storeToRefs } from 'pinia'
 import { v4 as uuid } from 'uuid'
