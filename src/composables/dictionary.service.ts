@@ -1,17 +1,33 @@
 import { useSearchStore } from '@/stores/searchStore'
-import { useTableStore } from '@/stores/tableStore'
+
 import { debounce } from 'lodash-es'
 import { storeToRefs } from 'pinia'
-import { computed, reactive, ref } from 'vue'
+import { ref } from 'vue'
 import { useDictionaryStore } from '../stores/dictionary'
 import { pb } from '../utils/pocketbaseConnection'
 
 const DEBOUNCE_TIMEOUT = 200
 
 export const useDictionaryService = () => {
-  const { dictionary, phonemes, phonograms } = storeToRefs(useDictionaryStore())
+  const { dictionary, phonemes, phonograms, loading } = storeToRefs(useDictionaryStore())
   const { searchState } = storeToRefs(useSearchStore())
   const initialItemsCache = ref<Map<string, IDictionaryEntry>>(new Map())
+
+  // -------------------
+  // InitialLoad
+  // -------------------
+  const initialPageLoad = async () => {
+    loading.value = true
+    try {
+      await Promise.all([fetchAllPhonograms(), fetchAllPhonemes(), getDictionaryPage()])
+      return true
+    } catch (error) {
+      console.error('🔥 Error during initial page load:', error)
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
 
   // -------------------
   // Fetch functions
@@ -414,7 +430,8 @@ export const useDictionaryService = () => {
     fetchAllPhonograms,
     phonemeSearch,
     phonogramSearch,
-    reorderTags
+    reorderTags,
+    initialPageLoad
   }
 }
 

@@ -4,7 +4,8 @@
       <template #start>
         <div class="flex items-center">
           <i class="pi pi-book text-primary text-xl mr-2"></i>
-          <span class="font-bold text-xl">Student Dictionary</span>
+          <span class="font-bold text-xl mr-1">Student Dictionary</span>
+          <span class="text-gray-500">v1.0.0</span>
         </div>
       </template>
 

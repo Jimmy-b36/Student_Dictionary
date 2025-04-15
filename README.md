@@ -15,9 +15,4 @@
 ## Requirements
 
 - Login page
-  - Need to learn about saving tokens to storage then having an auto login
-  - Need to have login with Google/GitHub
-- Logged home page
-  - Display for each student saved
-  - Table for quickly searching words
-  - Table for favourites
+  - Do I need to have login with Google/GitHub
