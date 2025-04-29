@@ -43,6 +43,19 @@
             />
           </div>
 
+          <div>
+            <label class="inline-flex items-center mt-4">
+              <input
+                type="checkbox"
+                v-model="form.tosAccepted"
+                :disabled="!checkTosAccepted()"
+                class="form-checkbox h-5 w-5 text-indigo-600 mr-2"
+              />
+
+              <TOSDialog ref="tosDialogRef" />
+            </label>
+          </div>
+
           <Button
             type="submit"
             :label="isSubmitting ? 'Creating Account...' : 'Sign Up'"
@@ -61,17 +74,27 @@ import { useAuthService } from '@/composables/auth.service'
 import { useToast } from 'primevue/usetoast'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import TOSDialog from './TOSDialog.vue'
 
 const router = useRouter()
 const { signup } = useAuthService()
 const toast = useToast()
 const isSubmitting = ref(false)
+const tosDialogRef = ref()
 
 const form = reactive({
   email: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
+  tosAccepted: false
 })
+
+const checkTosAccepted = () => {
+  if (tosDialogRef.value) {
+    form.tosAccepted = tosDialogRef.value.tosAccepted
+  }
+  return form.tosAccepted
+}
 
 const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -103,6 +126,10 @@ const validateForm = (): boolean => {
     errors.push('Passwords do not match')
   }
 
+  if (!form.tosAccepted) {
+    errors.push('You must accept the Terms of Service to sign up')
+  }
+
   if (errors.length > 0) {
     console.log('🔥', errors)
     toast.add({
@@ -121,7 +148,7 @@ const handleSubmit = async () => {
 
   isSubmitting.value = true
   try {
-    const success = await signup(form.email, form.password, form.confirmPassword)
+    const success = await signup(form.email, form.password, form.confirmPassword, form.tosAccepted)
     if (success) {
       toast.add({
         severity: 'success',
@@ -129,7 +156,7 @@ const handleSubmit = async () => {
         detail: 'Account created successfully',
         life: 3000
       })
-      router.push('/login')
+      router.push('/home')
     } else {
       toast.add({
         severity: 'error',

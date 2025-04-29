@@ -8,7 +8,6 @@
   />
   <Dialog
     :visible="isVisible"
-    @click="isVisible = true"
     :modal="true"
     :style="{ width: '450px' }"
     header="Create Student"
@@ -18,6 +17,10 @@
       <div class="field mb-4">
         <label for="identifier" class="block mb-2 font-medium">Nickname</label>
         <InputText id="identifier" v-model="name" required autofocus class="w-full" />
+        <small class="text-gray-500"
+          >Under <span class="font-bold text-red-500">NO</span> circumstances should you use a
+          student's real name</small
+        >
       </div>
     </div>
     <template #footer>
@@ -40,15 +43,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useToast } from 'primevue/usetoast'
-import { useStudentStore } from '@/stores/student.store'
-import { storeToRefs } from 'pinia'
 import { useStudentService } from '@/composables/student.service'
 
-const studentStore = useStudentStore()
+import { useToast } from 'primevue/usetoast'
+import { ref } from 'vue'
+
 const studentService = useStudentService()
-const { loading } = storeToRefs(studentStore)
 const toast = useToast()
 const isVisible = ref(false)
 const name = ref('')
@@ -63,7 +63,7 @@ const handleCreateStudent = async () => {
     })
     return
   }
-  
+
   try {
     await studentService.createStudent(name.value)
     toast.add({
@@ -75,13 +75,12 @@ const handleCreateStudent = async () => {
     isVisible.value = false
     name.value = ''
     emit('create')
-  } catch (error: any) {
-    console.log('🥶', error)
+  } catch (err: any) {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: error.message || 'Failed to create student',
-      life: 3000
+      detail: err.message || 'Failed to create student',
+      life: 5000
     })
   }
 }
