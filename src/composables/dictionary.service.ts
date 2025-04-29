@@ -100,8 +100,6 @@ export const useDictionaryService = () => {
   // -------------------
   // Search functions
   // -------------------
-  // Note: Main search functionality has been moved to search.service.ts
-  // Filter functions have been moved to search.service.ts
 
   const phonemeSearch = async (phonemeSearchArr: { id: string; phoneme: string }[]) => {
     if (phonemeSearchArr.length === 0) {
@@ -355,6 +353,7 @@ export const useDictionaryService = () => {
     // Type stuff
     if (isPhoneme) entry.phonemes.add(tagWithCorrectKey as { id: string; phoneme: string })
     else entry.phonograms.add(tagWithCorrectKey as { id: string; phonogram: string })
+
     try {
       await pb.collection(collection).create({
         word: wordId,
