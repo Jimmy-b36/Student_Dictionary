@@ -3,8 +3,13 @@
     <Menubar class="mb-4 flex justify-between" :model="menuItems">
       <template #start>
         <div class="flex items-center">
-          <i class="pi pi-book text-primary text-xl mr-2"></i>
-          <span class="font-bold text-xl mr-1">Student Dictionary</span>
+          <img
+            src="@/assets/vocab.png"
+            @click="router.push('/home')"
+            alt="Logo"
+            class="pi pi-book text-primary text-xl mr-2 w-32 h-auto cursor-pointer"
+          />
+
           <span class="text-gray-500">v1.0.0</span>
         </div>
       </template>
