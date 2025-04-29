@@ -1,6 +1,6 @@
 # Student Dictionary
 
-A privacy-first, teacher-focused vocabulary management app for K-12 classrooms. Built with Vue 3 (Composition API, TypeScript, Vite) and PocketBase.
+A privacy-first, teacher-focused vocabulary management app for K-12 classrooms. Built with Vue 3 + Vite + Pinia + PrimeVue + TypeScript and PocketBase.
 
 ---
 
