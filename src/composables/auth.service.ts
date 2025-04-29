@@ -32,11 +32,11 @@ export const useAuthService = () => {
     }
   }
 
-  const signup = async (email: string, password: string, confirmPassword: string) => {
+  const signup = async (email: string, password: string, confirmPassword: string, tosAccepted: boolean) => {
     try {
       const authData = await pb
         .collection('teachers')
-        .create({ email, password, passwordConfirm: confirmPassword })
+        .create({ email, password, passwordConfirm: confirmPassword, tosAccepted })
       if (authData) {
         await login(email, password)
         return true

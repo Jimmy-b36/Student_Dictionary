@@ -35,6 +35,9 @@ export function useStudentService() {
   const createStudent = async (name: string) => {
     const uniqueId = uuid()
     try {
+      if (pb.authStore.isAdmin) {
+        throw new UnauthorizedError('Only Teachers can create students')
+      }
       loading.value = true
       error.value = null
 
@@ -42,6 +45,7 @@ export function useStudentService() {
         display_name: name,
         unique_id: `${name}-${uniqueId.split('-')[2]}`
       })
+
       await pb.collection('teacher_students').create({
         teacher_id: pb.authStore.model?.id,
         student_id: res.id
@@ -57,6 +61,9 @@ export function useStudentService() {
       students.value.push(formattedStudent)
       return res
     } catch (err: any) {
+      if (err instanceof UnauthorizedError) {
+        throw err
+      }
       error.value = err.message || 'Failed to create student'
       throw new Error('Failed to create student')
     } finally {

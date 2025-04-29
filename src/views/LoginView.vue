@@ -1,6 +1,5 @@
 <template>
   <div>
-    <Toast position="top-left" />
     <div v-if="isSignup">
       <Signup>
         <template #toggleLogin v-if="!isAdminRoute">

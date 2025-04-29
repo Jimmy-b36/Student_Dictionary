@@ -46,6 +46,7 @@ declare module 'vue' {
     TeacherTable: typeof import('./src/components/teachers/TeacherTable.vue')['default']
     Textarea: typeof import('primevue/textarea')['default']
     Toast: typeof import('primevue/toast')['default']
+    TOSDialog: typeof import('./src/components/auth/TOSDialog.vue')['default']
   }
   export interface ComponentCustomProperties {
     Ripple: typeof import('primevue/ripple')['default']
