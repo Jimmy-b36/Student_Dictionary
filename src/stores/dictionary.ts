@@ -6,8 +6,9 @@ export const useDictionaryStore = defineStore('dictionary', () => {
   const dictionary = ref<IDictionary>(new Map())
   const phonemes = ref<IPhonemeObj[]>([])
   const phonograms = ref<IPhonogramObj[]>([])
+  const loading = ref(false)
 
-  return { dictionary, phonemes, phonograms }
+  return { dictionary, phonemes, phonograms, loading }
 })
 
 export interface IDictionary extends Map<string, IDictionaryEntry> {}

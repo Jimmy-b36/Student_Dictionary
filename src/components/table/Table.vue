@@ -186,12 +186,10 @@ const dragOptions = computed(() => {
   }
 })
 
-// TODO: only admins can reorder
 const handleReorder = async (tags: any[], word: string, wordId: number, isPhoneme: boolean) => {
   try {
     await reorderTags(word, String(wordId), tags, isPhoneme)
   } catch (error) {
-    console.log('🥶 Error handling reorder:', error)
     toast.add({
       severity: 'error',
       summary: 'Error',
@@ -202,7 +200,6 @@ const handleReorder = async (tags: any[], word: string, wordId: number, isPhonem
 }
 
 const onPageChange = (page: DataTablePageEvent) => {
-  // check for filters?
   if (hasActiveFilters.value) {
     return
   }

@@ -25,7 +25,7 @@
       aria-label="Phonograms filter"
     />
   </div>
-  <Table :loading="isSearching" />
+  <Table :loading="isLoading" />
 </template>
 
 <script setup lang="ts">
@@ -35,13 +35,16 @@ import { useDictionaryStore } from '@/stores/dictionary'
 import { useSearchStore } from '@/stores/searchStore'
 
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 import { onMounted, ref, watch } from 'vue'
 
 const searchStore = useSearchStore()
 const { searchState, isSearching } = storeToRefs(searchStore)
-const { phonemes, phonograms } = storeToRefs(useDictionaryStore())
+const { phonemes, phonograms, loading } = storeToRefs(useDictionaryStore())
 const { search } = useSearchService()
 const studentService = useStudentService()
+
+const isLoading = computed(() => isSearching.value || loading.value)
 
 const phonemeSearchParams = ref<{ id: string; phoneme: string }[]>([])
 const phonogramSearchParams = ref<{ id: string; phonogram: string }[]>([])

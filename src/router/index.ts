@@ -41,7 +41,7 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach((to, from) => {
+router.beforeEach((to) => {
   // check if the user is authenticated
   if (to.name !== 'Login' && to.name !== 'AdminLogin') {
     const isAuth = checkAuth()

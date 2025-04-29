@@ -21,6 +21,13 @@ export interface IStudentWord {
   word_id: string
 }
 
+export class UnauthorizedError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'UnauthorizedError'
+  }
+}
+
 export function useStudentService() {
   const studentStore = useStudentStore()
   const { students, loading, loaded, error } = storeToRefs(studentStore)
@@ -49,9 +56,8 @@ export function useStudentService() {
 
       students.value.push(formattedStudent)
       return res
-    } catch (error: any) {
-      console.log('🥶 Error creating student:', error)
-      error.value = error.message || 'Failed to create student'
+    } catch (err: any) {
+      error.value = err.message || 'Failed to create student'
       throw new Error('Failed to create student')
     } finally {
       loading.value = false
@@ -84,8 +90,8 @@ export function useStudentService() {
       loaded.value = true
 
       return formattedStudents
-    } catch (error: any) {
-      error.value = error.message || 'Failed to fetch students'
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch students'
       throw new Error('Failed to fetch students')
     } finally {
       loading.value = false
@@ -96,7 +102,7 @@ export function useStudentService() {
     try {
       const res = await pb.collection('students').getOne(id)
       return res
-    } catch (error: any) {
+    } catch (err: any) {
       throw new Error('Failed to fetch student')
     }
   }
@@ -121,8 +127,8 @@ export function useStudentService() {
       }
 
       return res
-    } catch (error: any) {
-      error.value = error.message || 'Failed to update student'
+    } catch (err: any) {
+      error.value = err.message || 'Failed to update student'
       throw new Error('Failed to update student')
     } finally {
       loading.value = false
@@ -136,7 +142,7 @@ export function useStudentService() {
 
       const hasAccess = await checkTeacherAccess(id)
       if (!hasAccess) {
-        throw new Error('Unauthorized access to student dictionary')
+        throw new UnauthorizedError('Unauthorized access to student dictionary')
       }
 
       const teacher_students_id = await pb
@@ -147,8 +153,10 @@ export function useStudentService() {
       students.value = students.value.filter((s) => s.id !== id)
 
       return res
-    } catch (error: any) {
-      error.value = error.message || 'Failed to delete student'
+    } catch (err: any) {
+      if (err instanceof UnauthorizedError) {
+        throw err
+      }
       throw new Error('Failed to delete student')
     } finally {
       loading.value = false
@@ -162,7 +170,7 @@ export function useStudentService() {
         teacher_id = "${pb.authStore.model?.id}" && student_id = "${studentId}"
       `)
       return !!res
-    } catch (error: any) {
+    } catch (err: any) {
       return false
     }
   }
@@ -172,7 +180,7 @@ export function useStudentService() {
     try {
       const hasAccess = await checkTeacherAccess(studentId)
       if (!hasAccess) {
-        throw new Error('Unauthorized access to student dictionary')
+        throw new UnauthorizedError('Unauthorized access to student dictionary')
       }
 
       const res = await pb.collection('student_words').getFullList({
@@ -203,7 +211,10 @@ export function useStudentService() {
         }),
         word_id: item.word_id
       }))
-    } catch (error: any) {
+    } catch (err: any) {
+      if (err instanceof UnauthorizedError) {
+        throw err
+      }
       throw new Error('Failed to fetch student words')
     }
   }
@@ -213,7 +224,7 @@ export function useStudentService() {
     try {
       const hasAccess = await checkTeacherAccess(studentId)
       if (!hasAccess) {
-        throw new Error('Unauthorized access to student dictionary')
+        throw new UnauthorizedError('Unauthorized access to student dictionary')
       }
 
       try {
@@ -221,8 +232,8 @@ export function useStudentService() {
           student_id = "${studentId}" && word_id = "${wordId}"
         `)
         throw new Error('Word already in student dictionary')
-      } catch (error: any) {
-        if (error.message !== 'Word already in student dictionary') {
+      } catch (err: any) {
+        if (err.message !== 'Word already in student dictionary') {
           const res = await pb.collection('student_words').create({
             student_id: studentId,
             word_id: wordId,
@@ -231,11 +242,14 @@ export function useStudentService() {
           })
           return res
         } else {
-          throw error
+          throw err
         }
       }
-    } catch (error: any) {
-      throw new Error(error.message || 'Failed to add word to student')
+    } catch (err: any) {
+      if (err instanceof UnauthorizedError) {
+        throw err
+      }
+      throw new Error(err.message || 'Failed to add word to student')
     }
   }
 
@@ -243,12 +257,15 @@ export function useStudentService() {
     try {
       const hasAccess = await checkTeacherAccess(studentId)
       if (!hasAccess) {
-        throw new Error('Unauthorized access to student dictionary')
+        throw new UnauthorizedError('Unauthorized access to student dictionary')
       }
 
       const res = await pb.collection('student_words').delete(studentWordId)
       return res
-    } catch (error: any) {
+    } catch (err: any) {
+      if (err instanceof UnauthorizedError) {
+        throw err
+      }
       throw new Error('Failed to remove word from student')
     }
   }
@@ -261,12 +278,15 @@ export function useStudentService() {
     try {
       const hasAccess = await checkTeacherAccess(studentId)
       if (!hasAccess) {
-        throw new Error('Unauthorized access to student dictionary')
+        throw new UnauthorizedError('Unauthorized access to student dictionary')
       }
 
       const res = await pb.collection('student_words').update(studentWordId, data)
       return res
-    } catch (error: any) {
+    } catch (err: any) {
+      if (err instanceof UnauthorizedError) {
+        throw err
+      }
       throw new Error('Failed to update student word')
     }
   }
