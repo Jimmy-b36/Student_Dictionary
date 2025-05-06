@@ -7,7 +7,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    env:
+        POCKETBASE_TEST_ADMIN_EMAIL: ${{ secrets.POCKETBASE_TEST_ADMIN_EMAIL }}
+        POCKETBASE_TEST_ADMIN_PASSWORD: ${{ secrets.POCKETBASE_TEST_ADMIN_PASSWORD }}
+        POCKETBASE_TEST_USER_EMAIL: ${{ secrets.POCKETBASE_TEST_USER_EMAIL }}
+        POCKETBASE_TEST_USER_PASSWORD: ${{ secrets.POCKETBASE_TEST_USER_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 

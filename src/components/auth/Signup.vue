@@ -50,6 +50,7 @@
                 v-model="form.tosAccepted"
                 :disabled="!checkTosAccepted()"
                 class="form-checkbox h-5 w-5 text-indigo-600 mr-2"
+                data-testid="tosCheckbox"
               />
 
               <TOSDialog ref="tosDialogRef" />
