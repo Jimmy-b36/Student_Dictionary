@@ -79,3 +79,7 @@ MIT
 ---
 
 **Notice:** This app is for educational use only. Do not store real student names or any PII. Violators will be removed.
+
+## TODO
+
+- Fix signup tests to include new tosAccepted parameter

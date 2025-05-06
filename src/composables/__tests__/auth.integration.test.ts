@@ -27,15 +27,18 @@ const adminLoginSpy = vi.fn().mockImplementation(async (email, password) => {
   }
 })
 
-const signupSpy = vi.fn().mockImplementation(async (email, password, confirmPassword) => {
-  const authData = await pb.collection('teachers').create({
-    email,
-    password,
-    passwordConfirm: confirmPassword
+const signupSpy = vi
+  .fn()
+  .mockImplementation(async (email, password, confirmPassword, tosAccepted) => {
+    const authData = await pb.collection('teachers').create({
+      email,
+      password,
+      passwordConfirm: confirmPassword,
+      tosAccepted
+    })
+    await pb.admins.authWithPassword(ADMIN_EMAIL, ADMIN_PASSWORD)
+    return authData
   })
-  await pb.admins.authWithPassword(ADMIN_EMAIL, ADMIN_PASSWORD)
-  return authData
-})
 
 const logoutSpy = vi.fn().mockImplementation(async () => {
   return true
@@ -105,6 +108,7 @@ describe('Auth Service', () => {
     const email = 'test@example.com'
     const password = 'password'
     const confirmPassword = 'password'
+    const tosAccepted = true
     let userId: string
 
     afterEach(async () => {
@@ -114,7 +118,7 @@ describe('Auth Service', () => {
     })
 
     it('should call signup', async () => {
-      const res = await authService.signup(email, password, confirmPassword)
+      const res = await authService.signup(email, password, confirmPassword, tosAccepted)
       userId = res.id
       expect(signupSpy).toHaveBeenCalled()
     })
