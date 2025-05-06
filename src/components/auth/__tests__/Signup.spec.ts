@@ -46,6 +46,16 @@ const Button = {
   props: ['label', 'disabled']
 }
 
+// Stub TOSDialog component
+const TOSDialog = {
+  template: '<div>TOS Dialog</div>',
+  setup() {
+    return {
+      tosAccepted: true // Always return true for tosAccepted in tests
+    }
+  }
+}
+
 describe('Signup.vue', () => {
   let wrapper: VueWrapper<any>
 
@@ -56,10 +66,16 @@ describe('Signup.vue', () => {
         stubs: {
           InputText,
           Password,
-          Button
+          Button,
+          TOSDialog
         }
       }
     })
+
+    wrapper.vm.tosDialogRef = { tosAccepted: true }
+
+    // Force update checkTosAccepted
+    wrapper.vm.checkTosAccepted()
   }
 
   beforeEach(() => {
@@ -123,10 +139,11 @@ describe('Signup.vue', () => {
     await wrapper.find('input[type="email"]').setValue('valid@email.com')
     await wrapper.findAllComponents(Password)[0].vm.$emit('update:modelValue', 'password123')
     await wrapper.findAllComponents(Password)[1].vm.$emit('update:modelValue', 'password123')
+    await wrapper.find('input[data-testid="tosCheckbox"]').setValue(true)
 
     await wrapper.find('form').trigger('submit.prevent')
 
-    expect(mockSignup).toHaveBeenCalledWith('valid@email.com', 'password123', 'password123')
+    expect(mockSignup).toHaveBeenCalledWith('valid@email.com', 'password123', 'password123', true)
     await wrapper.vm.$nextTick()
     expect(mockAdd).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -134,7 +151,7 @@ describe('Signup.vue', () => {
         summary: 'Success'
       })
     )
-    expect(mockRouterPush).toHaveBeenCalledWith('/login')
+    expect(mockRouterPush).toHaveBeenCalledWith('/home')
   })
 
   it('shows error toast on signup failure', async () => {
