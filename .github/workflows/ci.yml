@@ -15,6 +15,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+        env:
+          POCKETBASE_TEST_ADMIN_EMAIL: ${{ secrets.POCKETBASE_TEST_ADMIN_EMAIL }}
+          POCKETBASE_TEST_ADMIN_PASSWORD: ${{ secrets.POCKETBASE_TEST_ADMIN_PASSWORD }}
+          POCKETBASE_TEST_USER_EMAIL: ${{ secrets.POCKETBASE_TEST_USER_EMAIL }}
+          POCKETBASE_TEST_USER_PASSWORD: ${{ secrets.POCKETBASE_TEST_USER_PASSWORD }}
 
       - name: Install dependencies
         run: npm i
