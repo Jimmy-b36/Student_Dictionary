@@ -9,7 +9,7 @@
     @page="onPageChange"
     :loading="props.loading"
   >
-    <template #empty> No results found. </template>
+    <template #empty data-test-id="empty-table"> No results found. </template>
     <Column field="word" header="Word" />
     <Column field="phonemes" header="Phonemes">
       <template #body="{ data }">
@@ -146,10 +146,7 @@ import { storeToRefs } from 'pinia'
 import { type DataTablePageEvent } from 'primevue/datatable'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import draggable from 'vuedraggable'
-
-const router = useRouter()
 
 const tableStore = useTableStore()
 const { tableData } = storeToRefs(tableStore)
@@ -160,7 +157,7 @@ const props = defineProps(['loading'])
 
 const drag = ref(false)
 const toast = useToast()
-const isAdmin = pb.authStore.isAdmin
+const isAdmin = computed(() => pb.authStore.model?.isSuper)
 
 const dragOptions = computed(() => {
   return {
