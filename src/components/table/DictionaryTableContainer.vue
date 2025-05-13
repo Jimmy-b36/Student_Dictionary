@@ -25,7 +25,7 @@
       aria-label="Phonograms filter"
     />
   </div>
-  <Table :loading="isLoading" />
+  <DictionaryTable :loading="isLoading" />
 </template>
 
 <script setup lang="ts">
@@ -37,6 +37,7 @@ import { useSearchStore } from '@/stores/searchStore'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { onMounted, ref, watch } from 'vue'
+import DictionaryTable from './DictionaryTable.vue'
 
 const searchStore = useSearchStore()
 const { searchState, isSearching } = storeToRefs(searchStore)

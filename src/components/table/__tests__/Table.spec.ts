@@ -1,4 +1,4 @@
-import Table from '@/components/table/Table.vue'
+import Table from '@/components/table/DictionaryTable.vue'
 import { useTableStore } from '@/stores/tableStore'
 import { createTestingPinia } from '@pinia/testing'
 import { shallowMount, VueWrapper } from '@vue/test-utils'
