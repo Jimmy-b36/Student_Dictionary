@@ -1,6 +1,6 @@
 <template>
   <div class="container py-10 mx-auto">
-    <TableContainer v-if="!error" />
+    <DictionaryTableContainer v-if="!error" />
 
     <div v-else><Message severity="error">Error Loading Data. Please contact support</Message></div>
   </div>

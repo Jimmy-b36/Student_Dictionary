@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center space-x-2 mb-4">
-    <InputText v-model="wordSearchParams" class="mr-2" />
+    <InputText v-model="wordSearchParams" placeholder="Word Search" class="mr-2" />
 
     <MultiSelect
       v-model="phonemeSearchParams"
@@ -25,7 +25,7 @@
       aria-label="Phonograms filter"
     />
   </div>
-  <Table :loading="isLoading" />
+  <DictionaryTable :loading="isLoading" />
 </template>
 
 <script setup lang="ts">
@@ -37,6 +37,7 @@ import { useSearchStore } from '@/stores/searchStore'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { onMounted, ref, watch } from 'vue'
+import DictionaryTable from './DictionaryTable.vue'
 
 const searchStore = useSearchStore()
 const { searchState, isSearching } = storeToRefs(searchStore)

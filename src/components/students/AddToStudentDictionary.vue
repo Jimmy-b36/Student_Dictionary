@@ -4,7 +4,6 @@
     class="p-button-success p-button-rounded p-button-sm"
     @click="openDialog"
     v-tooltip.top="'Add to Student Dictionary'"
-    :label="isAdmin ? '' : 'Add to Student Dictionary'"
   />
 
   <Dialog

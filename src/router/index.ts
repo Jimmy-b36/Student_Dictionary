@@ -1,22 +1,30 @@
 import { checkAuth } from '@/router/middleware'
-import HomeView from '@/views/HomeView.vue'
+
 import LoginView from '@/views/LoginView.vue'
 
 import StudentView from '@/views/student/StudentView.vue'
 import TeacherView from '@/views/TeacherView.vue'
+import DictionaryView from '@/views/DictionaryView.vue'
+import DictionaryEntryView from '@/views/DictionaryEntryView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/home',
-      name: 'Home',
-      component: HomeView
-    },
-    {
       path: '/',
       redirect: { name: 'Home' }
+    },
+    {
+      path: '/home/dictionary',
+      name: 'Home',
+      component: DictionaryView
+    },
+    {
+      path: '/home/dictionary/add',
+      name: 'DictionaryEntry',
+      component: DictionaryEntryView
     },
     {
       path: '/login',
@@ -37,6 +45,11 @@ const router = createRouter({
       path: '/home/teacher',
       name: 'Teacher',
       component: TeacherView
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: NotFoundView
     }
   ]
 })

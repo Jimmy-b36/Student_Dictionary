@@ -25,39 +25,47 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthService } from '@/composables/auth.service'
-import type { MenuItem } from 'primevue/menuitem'
-import { useRouter } from 'vue-router'
+import { useAuthService } from '@/composables/auth.service';
+import type { MenuItem } from 'primevue/menuitem';
+import { useRouter } from 'vue-router';
 
-const router = useRouter()
-const { logout } = useAuthService()
+const router = useRouter();
+const { logout } = useAuthService();
 
 const menuItems: MenuItem[] = [
+  {
+    label: 'Add To Dictionary',
+    icon: 'pi pi-plus',
+    class: 'p-button-text rounded',
+    command: () => {
+      router.push('/home/dictionary/add');
+    },
+  },
   {
     label: 'Dictionary',
     icon: 'pi pi-book',
     class: 'p-button-text rounded',
     command: () => {
-      router.push('/home')
-    }
+      router.push('/home/dictionary');
+    },
   },
   {
     label: 'Students',
     icon: 'pi pi-users',
     class: 'p-button-text rounded',
     command: () => {
-      router.push('/home/teacher')
-    }
+      router.push('/home/teacher');
+    },
   },
   {
     label: 'Logout',
     icon: 'pi pi-sign-out',
     class: 'p-button-text p-button-danger rounded',
     command: () => {
-      logout()
-    }
-  }
-]
+      logout();
+    },
+  },
+];
 </script>
 
 <style scoped></style>
