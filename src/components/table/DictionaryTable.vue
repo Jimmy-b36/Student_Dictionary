@@ -130,6 +130,11 @@
       <template #body="{ data }">
         <div class="flex gap-2 justify-center">
           <AddToStudentDictionary :word="data" />
+          <DeleteGlobalWordModal
+            :word="data.word"
+            :word-id="data.id"
+            @word-deleted="onWordDeleted"
+          />
         </div>
       </template>
     </Column>
@@ -137,61 +142,67 @@
 </template>
 
 <script setup lang="ts">
-import dragHandle from '@/assets/drag-handle-svgrepo-com.svg?url'
-import { useDictionaryService } from '@/composables/dictionary.service'
-import { useSearchStore } from '@/stores/searchStore'
-import { useTableStore } from '@/stores/tableStore'
-import { pb } from '@/utils/pocketbaseConnection'
-import { storeToRefs } from 'pinia'
-import { type DataTablePageEvent } from 'primevue/datatable'
-import { useToast } from 'primevue/usetoast'
-import { computed, ref } from 'vue'
-import draggable from 'vuedraggable'
+import dragHandle from '@/assets/drag-handle-svgrepo-com.svg?url';
+import { useDictionaryService } from '@/composables/dictionary.service';
+import { useSearchStore } from '@/stores/searchStore';
+import { useTableStore } from '@/stores/tableStore';
+import { pb } from '@/utils/pocketbaseConnection';
+import { storeToRefs } from 'pinia';
+import { type DataTablePageEvent } from 'primevue/datatable';
+import { useToast } from 'primevue/usetoast';
+import { computed, ref } from 'vue';
+import draggable from 'vuedraggable';
+import AddToStudentDictionary from '../students/AddToStudentDictionary.vue';
+import DeleteGlobalWordModal from './DeleteGlobalWordModal.vue';
 
-const tableStore = useTableStore()
-const { tableData } = storeToRefs(tableStore)
-const { reorderTags } = useDictionaryService()
-const { hasActiveFilters } = storeToRefs(useSearchStore())
+const tableStore = useTableStore();
+const { tableData } = storeToRefs(tableStore);
+const { reorderTags, getDictionaryPage } = useDictionaryService();
+const { hasActiveFilters } = storeToRefs(useSearchStore());
 
-const props = defineProps(['loading'])
+const props = defineProps(['loading']);
 
-const drag = ref(false)
-const toast = useToast()
-const isAdmin = computed(() => pb.authStore.model?.isSuper)
+const drag = ref(false);
+const toast = useToast();
+const isAdmin = computed(() => pb.authStore.model?.isSuper);
 
 const dragOptions = computed(() => {
   return {
     animation: 200,
     group: 'description',
     disabled: false,
-    ghostClass: 'ghost'
-  }
-})
+    ghostClass: 'ghost',
+  };
+});
 
 const handleReorder = async (tags: any[], word: string, wordId: number, isPhoneme: boolean) => {
   try {
-    await reorderTags(word, String(wordId), tags, isPhoneme)
+    await reorderTags(word, String(wordId), tags, isPhoneme);
   } catch (error) {
     toast.add({
       severity: 'error',
       summary: 'Error',
       detail: `Failed to reorder ${isPhoneme ? 'phonemes' : 'phonograms'} for "${word}"`,
-      life: 3000
-    })
+      life: 3000,
+    });
   }
-}
+};
 
 const onPageChange = (page: DataTablePageEvent) => {
   if (hasActiveFilters.value) {
-    return
+    return;
   }
-  const totalFetchItems = 100
+  const totalFetchItems = 100;
   // adjusted page number for pre fetching
-  const adjustedPage = Math.floor((page.first + page.rows) / totalFetchItems)
+  const adjustedPage = Math.floor((page.first + page.rows) / totalFetchItems);
   if (page.page >= page.pageCount - 3) {
-    tableStore.fetchNextPages(adjustedPage + 1, totalFetchItems)
+    tableStore.fetchNextPages(adjustedPage + 1, totalFetchItems);
   }
-}
+};
+
+const onWordDeleted = () => {
+  getDictionaryPage(1, 100);
+};
 </script>
 
 <style scoped>
