@@ -40,36 +40,36 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthService } from '@/composables/auth.service'
-import { useToast } from 'primevue/usetoast'
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-const { login, adminLogin } = useAuthService()
+import { useAuthService } from '@/composables/auth.service';
+import { useToast } from 'primevue/usetoast';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+const { login, adminLogin } = useAuthService();
 
-const router = useRouter()
-const toast = useToast()
+const router = useRouter();
+const toast = useToast();
 
-const props = defineProps(['isAdminLogin'])
+const props = defineProps(['isAdminLogin']);
 
-const email = ref('')
-const password = ref('')
+const email = ref('');
+const password = ref('');
 
 const handleSubmit = async () => {
   try {
     if (props.isAdminLogin) {
-      const success = await adminLogin(email.value, password.value)
-      success && router.push('/home')
+      const success = await adminLogin(email.value, password.value);
+      success && router.push('/home/dictionary');
     } else {
-      const success = await login(email.value, password.value)
-      success && router.push('/home')
+      const success = await login(email.value, password.value);
+      success && router.push('/home/dictionary');
     }
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Error',
       detail: error.message || 'Failed to login',
-      life: 3000
-    })
+      life: 3000,
+    });
   }
-}
+};
 </script>
