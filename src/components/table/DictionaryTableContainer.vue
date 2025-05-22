@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center space-x-2 mb-4">
-    <InputText v-model="wordSearchParams" class="mr-2" />
+    <InputText v-model="wordSearchParams" placeholder="Word Search" class="mr-2" />
 
     <MultiSelect
       v-model="phonemeSearchParams"

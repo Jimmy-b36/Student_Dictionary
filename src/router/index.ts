@@ -6,19 +6,25 @@ import StudentView from '@/views/student/StudentView.vue'
 import TeacherView from '@/views/TeacherView.vue'
 import DictionaryView from '@/views/DictionaryView.vue'
 import DictionaryEntryView from '@/views/DictionaryEntryView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/',
+      redirect: { name: 'Home' }
+    },
+    {
       path: '/home/dictionary',
-      name: 'Dictionary',
+      name: 'Home',
       component: DictionaryView
     },
     {
-      path: '/',
-      redirect: { name: 'Home' }
+      path: '/home/dictionary/add',
+      name: 'DictionaryEntry',
+      component: DictionaryEntryView
     },
     {
       path: '/login',
@@ -41,9 +47,9 @@ const router = createRouter({
       component: TeacherView
     },
     {
-      path: '/home/dictionary-entry',
-      name: 'DictionaryEntry',
-      component: DictionaryEntryView
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: NotFoundView
     }
   ]
 })
