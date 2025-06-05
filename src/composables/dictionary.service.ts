@@ -116,7 +116,7 @@ export const useDictionaryService = () => {
         .join(' || '),
       expand: 'word.word_phonemes(word).phoneme,word.word_phonograms(word).phonogram',
       fields:
-        'expand.word.word,expand.word.expand.word_phonograms(word).expand.phonogram.phonogram,expand.word.expand.word_phonemes(word).expand.phoneme.phoneme,expand.word.expand.word_phonograms(word).expand.phonogram.id,expand.word.expand.word_phonemes(word).expand.phoneme.id',
+        'expand.word.word,expand.word.id,expand.word.expand.word_phonograms(word).expand.phonogram.phonogram,expand.word.expand.word_phonemes(word).expand.phoneme.phoneme,expand.word.expand.word_phonograms(word).expand.phonogram.id,expand.word.expand.word_phonemes(word).expand.phoneme.id',
     });
 
     res.forEach(({ expand }) => {
@@ -165,7 +165,7 @@ export const useDictionaryService = () => {
         .join(' || '),
       expand: 'word.word_phonemes(word).phoneme,word.word_phonograms(word).phonogram',
       fields:
-        'expand.word.word,expand.word.expand.word_phonograms(word).expand.phonogram.phonogram,expand.word.expand.word_phonemes(word).expand.phoneme.phoneme,expand.word.expand.word_phonograms(word).expand.phonogram.id,expand.word.expand.word_phonemes(word).expand.phoneme.id',
+        'expand.word.word,expand.word.id,expand.word.expand.word_phonograms(word).expand.phonogram.phonogram,expand.word.expand.word_phonemes(word).expand.phoneme.phoneme,expand.word.expand.word_phonograms(word).expand.phonogram.id,expand.word.expand.word_phonemes(word).expand.phoneme.id',
     });
 
     res.forEach(({ expand }) => {
@@ -282,7 +282,7 @@ export const useDictionaryService = () => {
     }
   };
 
-  type Tag = { id: string;[key: string]: string };
+  type Tag = { id: string; [key: string]: string };
 
   // Remove tag from word
   const removeTagFromWord = async (
@@ -306,7 +306,7 @@ export const useDictionaryService = () => {
         await _delete(collection, res[0].id, `${tag.tag} from ${word}`);
       }
 
-      entry[type].forEach((value: { id: string;[key: string]: string }) => {
+      entry[type].forEach((value: { id: string; [key: string]: string }) => {
         if (value.id === tag.id) {
           if (isPhoneme) {
             entry.phonemes.delete(value as { id: string; phoneme: string });
@@ -341,7 +341,7 @@ export const useDictionaryService = () => {
     };
 
     let hasTag = false;
-    entry[type].forEach((value: { id: string;[key: string]: string }) => {
+    entry[type].forEach((value: { id: string; [key: string]: string }) => {
       if (value.id === tagWithCorrectKey.id) hasTag = true;
     });
 
@@ -374,7 +374,7 @@ export const useDictionaryService = () => {
   const reorderTags = async (
     word: string,
     wordId: string,
-    tags: Array<{ id: string;[key: string]: string }>,
+    tags: Array<{ id: string; [key: string]: string }>,
     isPhoneme: boolean
   ): Promise<void> => {
     const entry = dictionary.value.get(word);
