@@ -7,15 +7,7 @@
       <StudentHeader :student="student" />
 
       <TabView>
-        <TabPanel header="Words" value="0">
-          <StudentWordTable
-            :studentWords="studentWords"
-            :studentId="studentId"
-            @refresh-words="refreshStudentWords"
-          />
-        </TabPanel>
-
-        <TabPanel header="Filtered Dictionary" value="1">
+        <TabPanel header="Filtered Dictionary" value="0">
           <StudentFilteredDictionary
             :studentId="studentId"
             :studentPhonemes="studentPhonemes"
@@ -23,11 +15,22 @@
             @word-added="refreshStudentWords"
           />
         </TabPanel>
+        <TabPanel header="Words" value="1">
+          <StudentWordTable
+            :studentWords="studentWords"
+            :studentId="studentId"
+            @refresh-words="refreshStudentWords"
+          />
+        </TabPanel>
 
         <TabPanel header="Phonemes & Phonograms" value="2">
-          <div class="text-center py-8 text-gray-500">
-            <p>Phoneme & Phonogram management will be available after resolving import issues</p>
-          </div>
+          <StudentPhonemePhonogramManager
+            :studentId="studentId"
+            :studentPhonemes="studentPhonemes"
+            :studentPhonograms="studentPhonograms"
+            @refresh-phonemes="refreshStudentPhonemes"
+            @refresh-phonograms="refreshStudentPhonograms"
+          />
         </TabPanel>
       </TabView>
     </div>
