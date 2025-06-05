@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { pb } from '@/utils/pocketbaseConnection'
 import { type AdminAuthResponse, type RecordAuthResponse } from 'pocketbase'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

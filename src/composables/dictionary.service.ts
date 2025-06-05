@@ -282,7 +282,7 @@ export const useDictionaryService = () => {
     }
   };
 
-  type Tag = { id: string; [key: string]: string };
+  type Tag = { id: string;[key: string]: string };
 
   // Remove tag from word
   const removeTagFromWord = async (
@@ -306,7 +306,7 @@ export const useDictionaryService = () => {
         await _delete(collection, res[0].id, `${tag.tag} from ${word}`);
       }
 
-      entry[type].forEach((value: { id: string; [key: string]: string }) => {
+      entry[type].forEach((value: { id: string;[key: string]: string }) => {
         if (value.id === tag.id) {
           if (isPhoneme) {
             entry.phonemes.delete(value as { id: string; phoneme: string });
@@ -341,7 +341,7 @@ export const useDictionaryService = () => {
     };
 
     let hasTag = false;
-    entry[type].forEach((value: { id: string; [key: string]: string }) => {
+    entry[type].forEach((value: { id: string;[key: string]: string }) => {
       if (value.id === tagWithCorrectKey.id) hasTag = true;
     });
 
@@ -374,7 +374,7 @@ export const useDictionaryService = () => {
   const reorderTags = async (
     word: string,
     wordId: string,
-    tags: Array<{ id: string; [key: string]: string }>,
+    tags: Array<{ id: string;[key: string]: string }>,
     isPhoneme: boolean
   ): Promise<void> => {
     const entry = dictionary.value.get(word);
@@ -433,6 +433,14 @@ export const useDictionaryService = () => {
       .getFirstListItem(`word="${word}"`)
       .catch(() => null);
     if (existing) throw new Error('Word already exists');
+
+    // Validate word
+    if (!word || word.length < 1 || word.length > 50) {
+      throw new Error('Invalid length word');
+    }
+    if (!word.match(/^[a-zA-Z]+$/)) {
+      throw new Error('Word must contain only letters');
+    }
 
     // Create word
     const created = await pb.collection('global_dictionary').create({ word });
