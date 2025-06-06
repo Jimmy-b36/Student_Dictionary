@@ -193,50 +193,6 @@ const loadFilteredDictionary = async () => {
       phonogram: p.phonogram,
     }));
 
-    // Use the new combined parallel search function for improved performance
-    // This fetches data in chunks of 50 records in parallel, significantly reducing load time
-    await dictionaryService.combinedSearchParallel(phonemeSearchArr, phonogramSearchArr, 50);
-  } catch (error) {
-    console.error('Error loading filtered dictionary:', error);
-    await dictionaryService.getDictionaryPage(1, 50);
-  } finally {
-    loading.value = false;
-  }
-};
-
-const loadFilteredDictionaryLegacy = async () => {
-  if (!isInitialized.value) {
-    console.log('Dictionary not yet initialized, waiting...');
-    return;
-  }
-
-  if (dictLoading.value) {
-    console.log('Dictionary still loading, waiting...');
-    return;
-  }
-
-  if (props.studentPhonemes.length === 0 && props.studentPhonograms.length === 0) {
-    dictionary.value.clear();
-    return;
-  }
-
-  loading.value = true;
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    const phonemeSearchArr = props.studentPhonemes.map((p) => ({
-      id: p.phoneme_id,
-      phoneme: p.phoneme,
-    }));
-
-    const phonogramSearchArr = props.studentPhonograms.map((p) => ({
-      id: p.phonogram_id,
-      phonogram: p.phonogram,
-    }));
-
-    dictionary.value.clear();
-
-    // Original sequential search method
     if (phonemeSearchArr.length > 0) {
       await dictionaryService.phonemeSearch(phonemeSearchArr);
     }
