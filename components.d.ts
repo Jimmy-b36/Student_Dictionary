@@ -11,7 +11,6 @@ declare module 'vue' {
     AddTagModal: typeof import('./src/components/table/AddTagModal.vue')['default']
     AddToStudentDictionary: typeof import('./src/components/students/AddToStudentDictionary.vue')['default']
     AddWordForm: typeof import('./src/components/dictionary/AddWordForm.vue')['default']
-    Avatar: typeof import('primevue/avatar')['default']
     Button: typeof import('primevue/button')['default']
     Card: typeof import('primevue/card')['default']
     Column: typeof import('primevue/column')['default']
