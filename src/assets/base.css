@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    background-color: #18181b;
+    min-height: 100vh;
+  }
+
+  #app {
+    background-color: #18181b;
+    min-height: 100vh;
+  }
+}

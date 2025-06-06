@@ -71,8 +71,32 @@ const { addWordToDictionary } = useDictionaryService();
 
 const toast = useToast();
 
+const validateWord = (word: string): string | null => {
+  if (!word.trim()) {
+    return 'Word is required';
+  }
+
+  if (word.trim().length > 50) {
+    return 'Word must be at most 50 characters long';
+  }
+
+  if (!/^[a-zA-Z]+$/.test(word.trim())) {
+    return 'Word must contain only letters (no spaces, numbers, or special characters)';
+  }
+
+  return null;
+};
+
 const onSubmit = async () => {
   error.value = '';
+
+  // Validate word
+  const validationError = validateWord(word.value);
+  if (validationError) {
+    error.value = validationError;
+    return;
+  }
+
   try {
     await addWordToDictionary(
       word.value.trim(),

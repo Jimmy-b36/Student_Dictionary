@@ -1,6 +1,6 @@
 import { pb } from '@/utils/pocketbaseConnection';
 import { createPinia, setActivePinia } from 'pinia';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useDictionaryService } from '../dictionary.service';
 
 const TEST_USER_EMAIL = process.env.POCKETBASE_TEST_USER_EMAIL;
@@ -8,7 +8,8 @@ const TEST_USER_PASSWORD = process.env.POCKETBASE_TEST_USER_PASSWORD;
 
 describe('Dictionary Service (integration)', () => {
   let dictionaryService: ReturnType<typeof useDictionaryService>;
-  const testWord = 'testword_xyz123';
+  const testWord = 'testwordxyz';
+  const failingWord = 'failingwordxyz_123';
   const testWordId = 'testwordid_xyz123';
 
   beforeAll(async () => {
@@ -26,6 +27,14 @@ describe('Dictionary Service (integration)', () => {
   });
 
   describe('addWordToDictionary', () => {
+    it('should only accept valid words', async () => {
+      await expect(dictionaryService.addWordToDictionary('')).rejects.toThrow(
+        'Invalid length word'
+      );
+      await expect(dictionaryService.addWordToDictionary(failingWord)).rejects.toThrow(
+        'Word must contain only letters'
+      );
+    });
     it('should add a word with phonemes and phonograms', async () => {
       const phonemeIds = ['qpncsu75nmsc78r', 'd8zqm6c5981r6lz'];
       const phonogramIds = ['1u6ddt2qav69umh'];
