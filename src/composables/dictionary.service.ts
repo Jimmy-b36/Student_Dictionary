@@ -14,6 +14,18 @@ export const useDictionaryService = () => {
   const initialItemsCache = ref<Map<string, IDictionaryEntry>>(new Map());
 
   // -------------------
+  // Helper Functions
+  // -------------------
+  const parseViewResponse = (response: IDictionaryResponse): IDictionaryEntry => {
+
+    return {
+      wordId: response.id,
+      phonemes: new Set(response.phonemes),
+      phonograms: new Set(response.phonograms),
+    };
+  };
+
+  // -------------------
   // InitialLoad
   // -------------------
   const initialPageLoad = async () => {
@@ -35,34 +47,23 @@ export const useDictionaryService = () => {
   const getDictionaryPage = async (currentPage = 1, pageSize = 100) => {
     try {
       const response = await pb
-        .collection('global_dictionary')
+        .collection('words_with_relations')
         .getList<IDictionaryResponse>(currentPage, pageSize, {
-          expand: 'word_phonemes(word).phoneme,word_phonograms(word).phonogram',
-          fields:
-            'id, word,expand.word_phonemes(word).expand.phoneme.phoneme,expand.word_phonograms(word).expand.phonogram.phonogram,expand.word_phonograms(word).expand.phonogram.id,expand.word_phonemes(word).expand.phoneme.id',
           skipTotal: true,
+          requestKey: null, // Disable auto-cancellation
         });
+
       if (currentPage === 1) {
         initialItemsCache.value.clear();
         dictionary.value.clear();
       }
 
-      response.items.forEach(({ word, expand, id }) => {
-        const phonemes = expand?.['word_phonemes(word)']?.map((phoneme) => phoneme.expand.phoneme);
-        const phonograms = expand?.['word_phonograms(word)']?.map(
-          (phonogram) => phonogram.expand.phonogram
-        );
-
-        const entry: IDictionaryEntry = {
-          wordId: id,
-          phonemes: new Set(phonemes ?? []),
-          phonograms: new Set(phonograms ?? []),
-        };
-
-        dictionary.value.set(word, entry);
+      response.items.forEach((item) => {
+        const entry = parseViewResponse(item);
+        dictionary.value.set(item.word, entry);
 
         if (currentPage === 1) {
-          initialItemsCache.value.set(word, entry);
+          initialItemsCache.value.set(item.word, entry);
         }
       });
     } catch (error) {
@@ -101,103 +102,6 @@ export const useDictionaryService = () => {
   // Search functions
   // -------------------
 
-  const phonemeSearch = async (phonemeSearchArr: { id: string; phoneme: string }[]) => {
-    if (phonemeSearchArr.length === 0) {
-      // If no phonemes are selected, fetch all
-      await getDictionaryPage(1, 100);
-      return;
-    }
-
-    dictionary.value.clear();
-
-    const res = await pb.collection('word_phonemes').getFullList({
-      filter: phonemeSearchArr
-        .map((phoneme) => `phoneme.phoneme="${phoneme.phoneme}"`)
-        .join(' || '),
-      expand: 'word.word_phonemes(word).phoneme,word.word_phonograms(word).phonogram',
-      fields:
-        'expand.word.word,expand.word.id,expand.word.expand.word_phonograms(word).expand.phonogram.phonogram,expand.word.expand.word_phonemes(word).expand.phoneme.phoneme,expand.word.expand.word_phonograms(word).expand.phonogram.id,expand.word.expand.word_phonemes(word).expand.phoneme.id',
-    });
-
-    res.forEach(({ expand }) => {
-      if (!expand?.word) return;
-
-      const phonemes = new Set<{ id: string; phoneme: string }>(
-        expand.word.expand['word_phonemes(word)']?.map((phoneme: any) => phoneme.expand.phoneme)
-      );
-
-      const phonograms = new Set<{ id: string; phonogram: string }>(
-        expand.word.expand?.['word_phonograms(word)']?.map(
-          (phonogram: any) => phonogram.expand.phonogram
-        )
-      );
-
-      const word = expand.word.word;
-      const wordId = expand.word.id;
-
-      // Only add words that have exactly the phonemes we're looking for
-      if (phonemes.size <= phonemeSearchArr.length) {
-        const hasAllPhonemes = [...phonemes].every((p) =>
-          phonemeSearchArr.some((searchP) => searchP.phoneme === p.phoneme)
-        );
-        if (hasAllPhonemes) {
-          dictionary.value.set(word, { wordId, phonemes, phonograms });
-          searchState.value.initialResults.set(word, { wordId, phonemes, phonograms });
-        }
-      }
-    });
-
-    return res;
-  };
-
-  const phonogramSearch = async (phonogramSearchArr: { id: string; phonogram: string }[]) => {
-    if (phonogramSearchArr.length === 0) {
-      // If no phonograms are selected, fetch all
-      await getDictionaryPage(1, 100);
-      return;
-    }
-
-    dictionary.value.clear();
-
-    const res = await pb.collection('word_phonograms').getFullList({
-      filter: phonogramSearchArr
-        .map((phonogram) => `phonogram.phonogram="${phonogram.phonogram}"`)
-        .join(' || '),
-      expand: 'word.word_phonemes(word).phoneme,word.word_phonograms(word).phonogram',
-      fields:
-        'expand.word.word,expand.word.id,expand.word.expand.word_phonograms(word).expand.phonogram.phonogram,expand.word.expand.word_phonemes(word).expand.phoneme.phoneme,expand.word.expand.word_phonograms(word).expand.phonogram.id,expand.word.expand.word_phonemes(word).expand.phoneme.id',
-    });
-
-    res.forEach(({ expand }) => {
-      if (!expand?.word) return;
-
-      const phonemes = new Set<{ id: string; phoneme: string }>(
-        expand.word.expand['word_phonemes(word)']?.map((phoneme: any) => phoneme.expand.phoneme)
-      );
-
-      const phonograms = new Set<{ id: string; phonogram: string }>(
-        expand.word.expand?.['word_phonograms(word)']?.map(
-          (phonogram: any) => phonogram.expand.phonogram
-        )
-      );
-
-      const word = expand.word.word;
-      const wordId = expand.word.id;
-
-      // Only add words that have exactly the phonograms we're looking for
-      if (phonograms.size <= phonogramSearchArr.length) {
-        const hasAllPhonograms = [...phonograms].every((p) =>
-          phonogramSearchArr.some((searchP) => searchP.phonogram === p.phonogram)
-        );
-        if (hasAllPhonograms) {
-          dictionary.value.set(word, { wordId, phonemes, phonograms });
-          searchState.value.initialResults.set(word, { wordId, phonemes, phonograms });
-        }
-      }
-    });
-    return res;
-  };
-
   const debouncedWordSearch = debounce(async (value: string) => {
     try {
       await searchDictionary(value);
@@ -228,33 +132,16 @@ export const useDictionaryService = () => {
 
     try {
       const uniqueKey = `${searchParam}_${Date.now()}`;
-      // Word search
-      const result = await pb.collection('global_dictionary').getList<IDictionaryResponse>(1, 30, {
+      const result = await pb.collection('words_with_relations').getList<IDictionaryResponse>(1, 30, {
         filter: `word~"${searchParam}"`,
-        expand: 'word_phonograms(word).phonogram,word_phonemes(word).phoneme',
-        fields:
-          'id, word,expand.word_phonograms(word).expand.phonogram,expand.word_phonemes(word).expand.phoneme',
         requestKey: uniqueKey,
       });
 
       if (result.items.length) {
-        result.items.forEach(({ word, expand, id }) => {
-          const phonemes = expand?.['word_phonemes(word)']?.map(
-            (phoneme) => phoneme.expand.phoneme
-          );
-          const phonograms = expand?.['word_phonograms(word)']?.map(
-            (phonogram) => phonogram.expand.phonogram
-          );
-          dictionary.value.set(word, {
-            wordId: id,
-            phonemes: new Set(phonemes ?? []),
-            phonograms: new Set(phonograms ?? []),
-          });
-          searchState.value.initialResults.set(word, {
-            wordId: id,
-            phonemes: new Set(phonemes ?? []),
-            phonograms: new Set(phonograms ?? []),
-          });
+        result.items.forEach((item) => {
+          const entry = parseViewResponse(item);
+          dictionary.value.set(item.word, entry);
+          searchState.value.initialResults.set(item.word, entry);
         });
         return;
       }
@@ -264,19 +151,8 @@ export const useDictionaryService = () => {
     }
   };
 
-  // -------------------
-  // Parallel Search functions for improved performance
-  //
-  // These functions improve initial load speed by:
-  // 1. Fetching data in chunks (default 50 records per chunk)
-  // 2. Processing multiple chunks in parallel using Promise.all()
-  // 3. Merging results on the frontend without blocking the UI
-  // 4. Reducing total wait time compared to sequential getFullList() calls
-  // -------------------
-
-  const phonemeSearchParallel = async (
-    phonemeSearchArr: { id: string; phoneme: string }[],
-    chunkSize = 50
+  const phonemeSearch = async (
+    phonemeSearchArr: { id: string; phoneme: string }[]
   ) => {
     if (phonemeSearchArr.length === 0) {
       await getDictionaryPage(1, 100);
@@ -285,65 +161,29 @@ export const useDictionaryService = () => {
 
     dictionary.value.clear();
 
-    // First, get the total count to determine how many chunks we need
-    const countResponse = await pb.collection('word_phonemes').getList(1, 1, {
-      filter: phonemeSearchArr
-        .map((phoneme) => `phoneme.phoneme="${phoneme.phoneme}"`)
-        .join(' || '),
-      skipTotal: false,
+    // Query words_with_relations view directly with phoneme filter
+    // Use ~ operator to search within the phonemes field
+    const phonemeFilter = phonemeSearchArr
+      .map((phoneme) => `phonemes ~ "${phoneme.phoneme}"`)
+      .join(' || '); // Use || for "words with any of these phonemes"
+
+    const wordsResponse = await pb.collection('words_with_relations').getFullList<IDictionaryResponse>({
+      filter: phonemeFilter,
+      requestKey: null,
     });
 
-    const totalItems = countResponse.totalItems;
-    const totalChunks = Math.ceil(totalItems / chunkSize);
-
-    // Create parallel fetch promises for each chunk
-    const fetchPromises = [];
-    for (let i = 1; i <= totalChunks; i++) {
-      const promise = pb.collection('word_phonemes').getList(i, chunkSize, {
-        filter: phonemeSearchArr
-          .map((phoneme) => `phoneme.phoneme="${phoneme.phoneme}"`)
-          .join(' || '),
-        expand: 'word.word_phonemes(word).phoneme,word.word_phonograms(word).phonogram',
-        fields:
-          'expand.word.word,expand.word.id,expand.word.expand.word_phonograms(word).expand.phonogram.phonogram,expand.word.expand.word_phonemes(word).expand.phoneme.phoneme,expand.word.expand.word_phonograms(word).expand.phonogram.id,expand.word.expand.word_phonemes(word).expand.phoneme.id',
-        skipTotal: true,
-      });
-      fetchPromises.push(promise);
-    }
-
-    // Execute all fetches in parallel
-    const results = await Promise.all(fetchPromises);
-
-    // Process all results and merge them
     const processedWords = new Map<string, IDictionaryEntry>();
 
-    results.forEach((response) => {
-      response.items.forEach(({ expand }) => {
-        if (!expand?.word) return;
+    wordsResponse.forEach((item) => {
+      const entry = parseViewResponse(item);
 
-        const phonemes = new Set<{ id: string; phoneme: string }>(
-          expand.word.expand['word_phonemes(word)']?.map((phoneme: any) => phoneme.expand.phoneme)
-        );
-
-        const phonograms = new Set<{ id: string; phonogram: string }>(
-          expand.word.expand?.['word_phonograms(word)']?.map(
-            (phonogram: any) => phonogram.expand.phonogram
-          )
-        );
-
-        const word = expand.word.word;
-        const wordId = expand.word.id;
-
-        // Only add words that have exactly the phonemes we're looking for
-        if (phonemes.size <= phonemeSearchArr.length) {
-          const hasAllPhonemes = [...phonemes].every((p) =>
-            phonemeSearchArr.some((searchP) => searchP.phoneme === p.phoneme)
-          );
-          if (hasAllPhonemes) {
-            processedWords.set(word, { wordId, phonemes, phonograms });
-          }
-        }
-      });
+      // Only add words where ALL phonemes are in the learned set
+      const allPhonemesLearned = [...entry.phonemes].every((p) =>
+        phonemeSearchArr.some((searchP) => searchP.phoneme === p.phoneme)
+      );
+      if (allPhonemesLearned) {
+        processedWords.set(item.word, entry);
+      }
     });
 
     // Update the dictionary with all processed words
@@ -355,9 +195,8 @@ export const useDictionaryService = () => {
     return processedWords;
   };
 
-  const phonogramSearchParallel = async (
-    phonogramSearchArr: { id: string; phonogram: string }[],
-    chunkSize = 50
+  const phonogramSearch = async (
+    phonogramSearchArr: { id: string; phonogram: string }[]
   ) => {
     if (phonogramSearchArr.length === 0) {
       await getDictionaryPage(1, 100);
@@ -366,65 +205,29 @@ export const useDictionaryService = () => {
 
     dictionary.value.clear();
 
-    // First, get the total count to determine how many chunks we need
-    const countResponse = await pb.collection('word_phonograms').getList(1, 1, {
-      filter: phonogramSearchArr
-        .map((phonogram) => `phonogram.phonogram="${phonogram.phonogram}"`)
-        .join(' || '),
-      skipTotal: false,
+    // Query words_with_relations view directly with phonogram filter
+    // Use ~ operator to search within the phonograms field
+    const phonogramFilter = phonogramSearchArr
+      .map((phonogram) => `phonograms ~ "${phonogram.phonogram}"`)
+      .join(' || '); // Use || for "words with any of these phonograms"
+
+    const wordsResponse = await pb.collection('words_with_relations').getFullList<IDictionaryResponse>({
+      filter: phonogramFilter,
+      requestKey: null,
     });
 
-    const totalItems = countResponse.totalItems;
-    const totalChunks = Math.ceil(totalItems / chunkSize);
-
-    // Create parallel fetch promises for each chunk
-    const fetchPromises = [];
-    for (let i = 1; i <= totalChunks; i++) {
-      const promise = pb.collection('word_phonograms').getList(i, chunkSize, {
-        filter: phonogramSearchArr
-          .map((phonogram) => `phonogram.phonogram="${phonogram.phonogram}"`)
-          .join(' || '),
-        expand: 'word.word_phonemes(word).phoneme,word.word_phonograms(word).phonogram',
-        fields:
-          'expand.word.word,expand.word.id,expand.word.expand.word_phonograms(word).expand.phonogram.phonogram,expand.word.expand.word_phonemes(word).expand.phoneme.phoneme,expand.word.expand.word_phonograms(word).expand.phonogram.id,expand.word.expand.word_phonemes(word).expand.phoneme.id',
-        skipTotal: true,
-      });
-      fetchPromises.push(promise);
-    }
-
-    // Execute all fetches in parallel
-    const results = await Promise.all(fetchPromises);
-
-    // Process all results and merge them
     const processedWords = new Map<string, IDictionaryEntry>();
 
-    results.forEach((response) => {
-      response.items.forEach(({ expand }) => {
-        if (!expand?.word) return;
+    wordsResponse.forEach((item) => {
+      const entry = parseViewResponse(item);
 
-        const phonemes = new Set<{ id: string; phoneme: string }>(
-          expand.word.expand['word_phonemes(word)']?.map((phoneme: any) => phoneme.expand.phoneme)
-        );
-
-        const phonograms = new Set<{ id: string; phonogram: string }>(
-          expand.word.expand?.['word_phonograms(word)']?.map(
-            (phonogram: any) => phonogram.expand.phonogram
-          )
-        );
-
-        const word = expand.word.word;
-        const wordId = expand.word.id;
-
-        // Only add words that have exactly the phonograms we're looking for
-        if (phonograms.size <= phonogramSearchArr.length) {
-          const hasAllPhonograms = [...phonograms].every((p) =>
-            phonogramSearchArr.some((searchP) => searchP.phonogram === p.phonogram)
-          );
-          if (hasAllPhonograms) {
-            processedWords.set(word, { wordId, phonemes, phonograms });
-          }
-        }
-      });
+      // Only add words where ALL phonograms are in the learned set
+      const allPhonogramsLearned = [...entry.phonograms].every((p) =>
+        phonogramSearchArr.some((searchP) => searchP.phonogram === p.phonogram)
+      );
+      if (allPhonogramsLearned) {
+        processedWords.set(item.word, entry);
+      }
     });
 
     // Update the dictionary with all processed words
@@ -439,166 +242,64 @@ export const useDictionaryService = () => {
   // Combined parallel search function for both phonemes and phonograms
   const combinedSearchParallel = async (
     phonemeSearchArr: { id: string; phoneme: string }[],
-    phonogramSearchArr: { id: string; phonogram: string }[],
-    chunkSize = 50
+    phonogramSearchArr: { id: string; phonogram: string }[]
   ) => {
     dictionary.value.clear();
 
-    const searchPromises = [];
+    // Build combined filter for words_with_relations view
+    const filters = [];
 
-    // Add phoneme search promise if phonemes are provided
     if (phonemeSearchArr.length > 0) {
-      searchPromises.push(
-        (async () => {
-          const countResponse = await pb.collection('word_phonemes').getList(1, 1, {
-            filter: phonemeSearchArr
-              .map((phoneme) => `phoneme.phoneme="${phoneme.phoneme}"`)
-              .join(' || '),
-            skipTotal: false,
-          });
-
-          const totalItems = countResponse.totalItems;
-          const totalChunks = Math.ceil(totalItems / chunkSize);
-
-          const fetchPromises = [];
-          for (let i = 1; i <= totalChunks; i++) {
-            const promise = pb.collection('word_phonemes').getList(i, chunkSize, {
-              filter: phonemeSearchArr
-                .map((phoneme) => `phoneme.phoneme="${phoneme.phoneme}"`)
-                .join(' || '),
-              expand: 'word.word_phonemes(word).phoneme,word.word_phonograms(word).phonogram',
-              fields:
-                'expand.word.word,expand.word.id,expand.word.expand.word_phonograms(word).expand.phonogram.phonogram,expand.word.expand.word_phonemes(word).expand.phoneme.phoneme,expand.word.expand.word_phonograms(word).expand.phonogram.id,expand.word.expand.word_phonemes(word).expand.phoneme.id',
-              skipTotal: true,
-            });
-            fetchPromises.push(promise);
-          }
-
-          return Promise.all(fetchPromises);
-        })()
-      );
+      const phonemeFilter = phonemeSearchArr
+        .map((phoneme) => `phonemes ~ "${phoneme.phoneme}"`)
+        .join(' || ');
+      filters.push(`(${phonemeFilter})`);
     }
 
-    // Add phonogram search promise if phonograms are provided
     if (phonogramSearchArr.length > 0) {
-      searchPromises.push(
-        (async () => {
-          const countResponse = await pb.collection('word_phonograms').getList(1, 1, {
-            filter: phonogramSearchArr
-              .map((phonogram) => `phonogram.phonogram="${phonogram.phonogram}"`)
-              .join(' || '),
-            skipTotal: false,
-          });
-
-          const totalItems = countResponse.totalItems;
-          const totalChunks = Math.ceil(totalItems / chunkSize);
-
-          const fetchPromises = [];
-          for (let i = 1; i <= totalChunks; i++) {
-            const promise = pb.collection('word_phonograms').getList(i, chunkSize, {
-              filter: phonogramSearchArr
-                .map((phonogram) => `phonogram.phonogram="${phonogram.phonogram}"`)
-                .join(' || '),
-              expand: 'word.word_phonemes(word).phoneme,word.word_phonograms(word).phonogram',
-              fields:
-                'expand.word.word,expand.word.id,expand.word.expand.word_phonograms(word).expand.phonogram.phonogram,expand.word.expand.word_phonemes(word).expand.phoneme.phoneme,expand.word.expand.word_phonograms(word).expand.phonogram.id,expand.word.expand.word_phonemes(word).expand.phoneme.id',
-              skipTotal: true,
-            });
-            fetchPromises.push(promise);
-          }
-
-          return Promise.all(fetchPromises);
-        })()
-      );
+      const phonogramFilter = phonogramSearchArr
+        .map((phonogram) => `phonograms ~ "${phonogram.phonogram}"`)
+        .join(' || ');
+      filters.push(`(${phonogramFilter})`);
     }
 
-    // Execute all search operations in parallel
-    const allResults = await Promise.all(searchPromises);
+    if (filters.length === 0) {
+      return new Map();
+    }
+
+    // Combine filters with AND logic (must match both phonemes AND phonograms if both are specified)
+    const combinedFilter = filters.join(' && ');
+
+    const wordsResponse = await pb.collection('words_with_relations').getFullList<IDictionaryResponse>({
+      filter: combinedFilter,
+      requestKey: null,
+    });
 
     // Process results
-    const phonemeWords = new Map<string, IDictionaryEntry>();
-    const phonogramWords = new Map<string, IDictionaryEntry>();
+    const finalWords = new Map<string, IDictionaryEntry>();
 
-    // Process phoneme results (first promise if exists)
-    if (phonemeSearchArr.length > 0 && allResults[0]) {
-      allResults[0].forEach((response: any) => {
-        response.items.forEach(({ expand }: any) => {
-          if (!expand?.word) return;
+    wordsResponse.forEach((item) => {
+      const entry = parseViewResponse(item);
 
-          const phonemes = new Set<{ id: string; phoneme: string }>(
-            expand.word.expand['word_phonemes(word)']?.map((phoneme: any) => phoneme.expand.phoneme)
-          );
+      // Check phoneme criteria - all phonemes must be learned
+      const matchesPhonemes =
+        phonemeSearchArr.length === 0 ||
+        [...entry.phonemes].every((p) =>
+          phonemeSearchArr.some((searchP) => searchP.phoneme === p.phoneme)
+        );
 
-          const phonograms = new Set<{ id: string; phonogram: string }>(
-            expand.word.expand?.['word_phonograms(word)']?.map(
-              (phonogram: any) => phonogram.expand.phonogram
-            )
-          );
+      // Check phonogram criteria - all phonograms must be learned
+      const matchesPhonograms =
+        phonogramSearchArr.length === 0 ||
+        [...entry.phonograms].every((p) =>
+          phonogramSearchArr.some((searchP) => searchP.phonogram === p.phonogram)
+        );
 
-          const word = expand.word.word;
-          const wordId = expand.word.id;
-
-          if (phonemes.size <= phonemeSearchArr.length) {
-            const hasAllPhonemes = [...phonemes].every((p) =>
-              phonemeSearchArr.some((searchP) => searchP.phoneme === p.phoneme)
-            );
-            if (hasAllPhonemes) {
-              phonemeWords.set(word, { wordId, phonemes, phonograms });
-            }
-          }
-        });
-      });
-    }
-
-    // Process phonogram results (second promise if exists, or first if no phonemes)
-    const phonogramResultIndex = phonemeSearchArr.length > 0 ? 1 : 0;
-    if (phonogramSearchArr.length > 0 && allResults[phonogramResultIndex]) {
-      allResults[phonogramResultIndex].forEach((response: any) => {
-        response.items.forEach(({ expand }: any) => {
-          if (!expand?.word) return;
-
-          const phonemes = new Set<{ id: string; phoneme: string }>(
-            expand.word.expand['word_phonemes(word)']?.map((phoneme: any) => phoneme.expand.phoneme)
-          );
-
-          const phonograms = new Set<{ id: string; phonogram: string }>(
-            expand.word.expand?.['word_phonograms(word)']?.map(
-              (phonogram: any) => phonogram.expand.phonogram
-            )
-          );
-
-          const word = expand.word.word;
-          const wordId = expand.word.id;
-
-          if (phonograms.size <= phonogramSearchArr.length) {
-            const hasAllPhonograms = [...phonograms].every((p) =>
-              phonogramSearchArr.some((searchP) => searchP.phonogram === p.phonogram)
-            );
-            if (hasAllPhonograms) {
-              phonogramWords.set(word, { wordId, phonemes, phonograms });
-            }
-          }
-        });
-      });
-    }
-
-    // Combine results based on search criteria
-    let finalWords = new Map<string, IDictionaryEntry>();
-
-    if (phonemeSearchArr.length > 0 && phonogramSearchArr.length > 0) {
-      // Both phonemes and phonograms - find intersection
-      for (const [word, entry] of phonemeWords) {
-        if (phonogramWords.has(word)) {
-          finalWords.set(word, entry);
-        }
+      // Add word if it matches the criteria
+      if (matchesPhonemes && matchesPhonograms) {
+        finalWords.set(item.word, entry);
       }
-    } else if (phonemeSearchArr.length > 0) {
-      // Only phonemes
-      finalWords = phonemeWords;
-    } else if (phonogramSearchArr.length > 0) {
-      // Only phonograms
-      finalWords = phonogramWords;
-    }
+    });
 
     // Update the dictionary with final results
     finalWords.forEach((entry, word) => {
@@ -627,7 +328,7 @@ export const useDictionaryService = () => {
     }
   };
 
-  type Tag = { id: string; [key: string]: string };
+  type Tag = { id: string;[key: string]: string };
 
   // Remove tag from word
   const removeTagFromWord = async (
@@ -651,7 +352,7 @@ export const useDictionaryService = () => {
         await _delete(collection, res[0].id, `${tag.tag} from ${word}`);
       }
 
-      entry[type].forEach((value: { id: string; [key: string]: string }) => {
+      entry[type].forEach((value: { id: string;[key: string]: string }) => {
         if (value.id === tag.id) {
           if (isPhoneme) {
             entry.phonemes.delete(value as { id: string; phoneme: string });
@@ -686,7 +387,7 @@ export const useDictionaryService = () => {
     };
 
     let hasTag = false;
-    entry[type].forEach((value: { id: string; [key: string]: string }) => {
+    entry[type].forEach((value: { id: string;[key: string]: string }) => {
       if (value.id === tagWithCorrectKey.id) hasTag = true;
     });
 
@@ -719,7 +420,7 @@ export const useDictionaryService = () => {
   const reorderTags = async (
     word: string,
     wordId: string,
-    tags: Array<{ id: string; [key: string]: string }>,
+    tags: Array<{ id: string;[key: string]: string }>,
     isPhoneme: boolean
   ): Promise<void> => {
     const entry = dictionary.value.get(word);
@@ -848,8 +549,6 @@ export const useDictionaryService = () => {
     fetchAllPhonograms,
     phonemeSearch,
     phonogramSearch,
-    phonemeSearchParallel,
-    phonogramSearchParallel,
     combinedSearchParallel,
     reorderTags,
     initialPageLoad,
@@ -863,24 +562,8 @@ export const useDictionaryService = () => {
 interface IDictionaryResponse {
   id: string;
   word: string;
-  expand: {
-    'word_phonemes(word)': IWordPhoneme[];
-    'word_phonograms(word)': IWordPhonogram[];
-  };
-}
-
-interface IWordPhoneme {
-  expand: {
-    phoneme: { id: string; phoneme: string };
-    word: { word: string };
-  };
-}
-
-interface IWordPhonogram {
-  expand: {
-    phonogram: { id: string; phonogram: string };
-    word: { word: string };
-  };
+  phonemes: string;
+  phonograms: string;
 }
 
 export interface ITableHeaders {
@@ -892,6 +575,6 @@ export interface ITableHeaders {
 
 export interface IDictionaryEntry {
   wordId: string;
-  phonemes: Set<{ id: string; phoneme: string }>;
-  phonograms: Set<{ id: string; phonogram: string }>;
+  phonemes: Set<string>;
+  phonograms: Set<string>;
 }
