@@ -17,7 +17,6 @@ export const useDictionaryService = () => {
   // Helper Functions
   // -------------------
   const parseViewResponse = (response: IDictionaryResponse): IDictionaryEntry => {
-
     return {
       wordId: response.id,
       phonemes: new Set(response.phonemes),
@@ -562,8 +561,8 @@ export const useDictionaryService = () => {
 interface IDictionaryResponse {
   id: string;
   word: string;
-  phonemes: string;
-  phonograms: string;
+  phonemes: { id: string; phoneme: string }[];
+  phonograms: { id: string; phonogram: string }[];
 }
 
 export interface ITableHeaders {
@@ -575,6 +574,6 @@ export interface ITableHeaders {
 
 export interface IDictionaryEntry {
   wordId: string;
-  phonemes: Set<string>;
-  phonograms: Set<string>;
+  phonemes: Set<{ id: string; phoneme: string }>;
+  phonograms: Set<{ id: string; phonogram: string }>;
 }
