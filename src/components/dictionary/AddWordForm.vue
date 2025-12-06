@@ -55,9 +55,9 @@
 </template>
 <script setup lang="ts">
 import { useDictionaryService } from '@/composables/dictionary.service';
+import { useToastHelper } from '@/composables/toast.helper';
 import { useDictionaryStore } from '@/stores/dictionary';
 import { storeToRefs } from 'pinia';
-import { useToast } from 'primevue/usetoast';
 import { ref } from 'vue';
 
 const word = ref('');
@@ -69,7 +69,7 @@ const dictionaryStore = storeToRefs(useDictionaryStore());
 const { phonemes, phonograms } = dictionaryStore;
 const { addWordToDictionary } = useDictionaryService();
 
-const toast = useToast();
+const toast = useToastHelper();
 
 const validateWord = (word: string): string | null => {
   if (!word.trim()) {
@@ -106,12 +106,7 @@ const onSubmit = async () => {
     word.value = '';
     selectedPhonemes.value = [];
     selectedPhonograms.value = [];
-    toast.add({
-      severity: 'success',
-      summary: 'Word Added',
-      detail: 'Successfully added word to dictionary!',
-      life: 2000,
-    });
+    toast.success('Successfully added word to dictionary!', 'Word Added');
   } catch (e: any) {
     error.value = e.message;
     console.log('🔥', e);

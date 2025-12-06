@@ -35,9 +35,9 @@
 
 <script setup lang="ts">
 import { useStudentService, type IStudent } from '@/composables/student.service';
+import { useToastHelper } from '@/composables/toast.helper';
 import { useStudentStore } from '@/stores/student.store';
 import { storeToRefs } from 'pinia';
-import { useToast } from 'primevue/usetoast';
 import { ref, watch } from 'vue';
 
 const props = defineProps<{
@@ -48,7 +48,7 @@ const emit = defineEmits(['updated']);
 const studentStore = useStudentStore();
 const studentService = useStudentService();
 const { loading } = storeToRefs(studentStore);
-const toast = useToast();
+const toast = useToastHelper();
 const isVisible = ref(false);
 const name = ref('');
 
@@ -70,33 +70,18 @@ const openModal = () => {
 
 const handleUpdate = async () => {
   if (!name.value.trim()) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: 'Student name is required',
-      life: 3000,
-    });
+    toast.error('Student name is required');
     return;
   }
 
   try {
     await studentService.updateStudent(props.student.id, name.value);
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Student updated successfully',
-      life: 3000,
-    });
+    toast.success('Student updated successfully');
     isVisible.value = false;
     emit('updated');
   } catch (error: any) {
     console.log('🥶', error);
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: error.message || 'Failed to update student',
-      life: 3000,
-    });
+    toast.error(error.message || 'Failed to update student');
   }
 };
 </script>

@@ -82,7 +82,7 @@
 
 <script setup lang="ts">
 import { useStudentService, type IStudentWord } from '@/composables/student.service'
-import { useToast } from 'primevue/usetoast'
+import { useToastHelper } from '@/composables/toast.helper'
 import { ref } from 'vue'
 import DeleteWordModal from './DeleteWordModal.vue'
 import EditNotesModal from './EditNotesModal.vue'
@@ -96,7 +96,7 @@ const emit = defineEmits<{
   'refresh-words': []
 }>()
 
-const toast = useToast()
+const toast = useToastHelper()
 const studentService = useStudentService()
 const loading = ref(false)
 
@@ -106,20 +106,9 @@ const updateMastery = async (word: IStudentWord) => {
     await studentService.updateStudentWord(props.studentId, word.id, {
       mastery_level: word.mastery_level
     })
-
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Mastery level updated',
-      life: 2000
-    })
+    toast.success('Mastery level updated')
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: 'Failed to update mastery level',
-      life: 3000
-    })
+    toast.error('Failed to update mastery level')
     // Reset UI to match server state
     refreshWords()
   } finally {

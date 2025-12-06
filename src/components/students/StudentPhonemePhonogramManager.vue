@@ -177,9 +177,9 @@ import {
   type IStudentPhoneme,
   type IStudentPhonogram,
 } from '@/composables/student.service';
+import { useToastHelper } from '@/composables/toast.helper';
 import { useDictionaryStore } from '@/stores/dictionary';
 import { storeToRefs } from 'pinia';
-import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref } from 'vue';
 
 interface Props {
@@ -198,7 +198,7 @@ const emit = defineEmits<{
 const studentService = useStudentService();
 const dictionaryStore = useDictionaryStore();
 const { phonemes, phonograms } = storeToRefs(dictionaryStore);
-const toast = useToast();
+const toast = useToastHelper();
 
 const loading = ref(false);
 const addingPhonemes = ref(false);
@@ -223,23 +223,11 @@ const addPhonemes = async () => {
   addingPhonemes.value = true;
   try {
     await studentService.addPhonemesToStudent(props.studentId, selectedPhonemes.value);
-
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: `Added ${selectedPhonemes.value.length} phoneme(s) to student`,
-      life: 3000,
-    });
-
+    toast.success(`Added ${selectedPhonemes.value.length} phoneme(s) to student`);
     selectedPhonemes.value = [];
     emit('refresh-phonemes');
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: error.message || 'Failed to add phonemes',
-      life: 5000,
-    });
+    toast.error(error.message || 'Failed to add phonemes');
   } finally {
     addingPhonemes.value = false;
   }
@@ -251,23 +239,11 @@ const addPhonograms = async () => {
   addingPhonograms.value = true;
   try {
     await studentService.addPhonogramsToStudent(props.studentId, selectedPhonograms.value);
-
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: `Added ${selectedPhonograms.value.length} phonogram(s) to student`,
-      life: 3000,
-    });
-
+    toast.success(`Added ${selectedPhonograms.value.length} phonogram(s) to student`);
     selectedPhonograms.value = [];
     emit('refresh-phonograms');
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: error.message || 'Failed to add phonograms',
-      life: 5000,
-    });
+    toast.error(error.message || 'Failed to add phonograms');
   } finally {
     addingPhonograms.value = false;
   }
@@ -278,22 +254,10 @@ const removePhoneme = async (phoneme: IStudentPhoneme) => {
 
   try {
     await studentService.removePhonemeFromStudent(props.studentId, phoneme.id);
-
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: `Removed phoneme "${phoneme.phoneme}" from student`,
-      life: 3000,
-    });
-
+    toast.success(`Removed phoneme "${phoneme.phoneme}" from student`);
     emit('refresh-phonemes');
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: error.message || 'Failed to remove phoneme',
-      life: 5000,
-    });
+    toast.error(error.message || 'Failed to remove phoneme');
   } finally {
     removingItems.value.delete(phoneme.id);
   }
@@ -304,22 +268,10 @@ const removePhonogram = async (phonogram: IStudentPhonogram) => {
 
   try {
     await studentService.removePhonogramFromStudent(props.studentId, phonogram.id);
-
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: `Removed phonogram "${phonogram.phonogram}" from student`,
-      life: 3000,
-    });
-
+    toast.success(`Removed phonogram "${phonogram.phonogram}" from student`);
     emit('refresh-phonograms');
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: error.message || 'Failed to remove phonogram',
-      life: 5000,
-    });
+    toast.error(error.message || 'Failed to remove phonogram');
   } finally {
     removingItems.value.delete(phonogram.id);
   }

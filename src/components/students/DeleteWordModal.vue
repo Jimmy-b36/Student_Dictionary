@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { useStudentService, type IStudentWord } from '@/composables/student.service'
-import { useToast } from 'primevue/usetoast'
+import { useToastHelper } from '@/composables/toast.helper'
 import { ref } from 'vue'
 
 const props = defineProps<{
@@ -33,7 +33,7 @@ const emit = defineEmits<{
   'word-removed': []
 }>()
 
-const toast = useToast()
+const toast = useToastHelper()
 const studentService = useStudentService()
 const loading = ref(false)
 const visible = ref(false)
@@ -46,23 +46,11 @@ const handleRemoveWord = async () => {
   loading.value = true
   try {
     await studentService.removeWordFromStudent(props.studentId, props.word.id)
-
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Word removed from student dictionary',
-      life: 3000
-    })
-
+    toast.success('Word removed from student dictionary')
     visible.value = false
     emit('word-removed')
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: 'Failed to remove word',
-      life: 3000
-    })
+    toast.error('Failed to remove word')
   } finally {
     loading.value = false
   }

@@ -44,44 +44,28 @@
 
 <script setup lang="ts">
 import { useStudentService } from '@/composables/student.service'
-
-import { useToast } from 'primevue/usetoast'
+import { useToastHelper } from '@/composables/toast.helper'
 import { ref } from 'vue'
 
 const studentService = useStudentService()
-const toast = useToast()
+const toast = useToastHelper()
 const isVisible = ref(false)
 const name = ref('')
 
 const handleCreateStudent = async () => {
   if (!name.value.trim()) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: 'Student name is required',
-      life: 3000
-    })
+    toast.error('Student name is required')
     return
   }
 
   try {
     await studentService.createStudent(name.value)
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Student created successfully',
-      life: 3000
-    })
+    toast.success('Student created successfully')
     isVisible.value = false
     name.value = ''
     emit('create')
   } catch (err: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: err.message || 'Failed to create student',
-      life: 5000
-    })
+    toast.error(err.message || 'Failed to create student')
   }
 }
 

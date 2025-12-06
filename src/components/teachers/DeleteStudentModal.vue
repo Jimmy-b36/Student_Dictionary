@@ -38,9 +38,9 @@
 
 <script setup lang="ts">
 import { useStudentService, type IStudent } from '@/composables/student.service';
+import { useToastHelper } from '@/composables/toast.helper';
 import { useStudentStore } from '@/stores/student.store';
 import { storeToRefs } from 'pinia';
-import { useToast } from 'primevue/usetoast';
 import { ref } from 'vue';
 
 const props = defineProps<{
@@ -51,7 +51,7 @@ const emit = defineEmits(['deleted']);
 const studentStore = useStudentStore();
 const studentService = useStudentService();
 const { loading } = storeToRefs(studentStore);
-const toast = useToast();
+const toast = useToastHelper();
 const isVisible = ref(false);
 
 const confirmDelete = () => {
@@ -63,22 +63,12 @@ const handleDelete = async () => {
 
   try {
     await studentService.deleteStudent(props.student.id);
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: `Student ${props.student.display_name} deleted successfully`,
-      life: 3000,
-    });
+    toast.success(`Student ${props.student.display_name} deleted successfully`);
     isVisible.value = false;
     emit('deleted');
   } catch (error: any) {
     console.log('🥶', error);
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: error.message || 'Failed to delete student',
-      life: 3000,
-    });
+    toast.error(error.message || 'Failed to delete student');
   }
 };
 </script>

@@ -147,9 +147,9 @@ import { useDictionaryService } from '@/composables/dictionary.service';
 import { useSearchStore } from '@/stores/searchStore';
 import { useTableStore } from '@/stores/tableStore';
 import { pb } from '@/utils/pocketbaseConnection';
+import { useToastHelper } from '@/composables/toast.helper';
 import { storeToRefs } from 'pinia';
 import { type DataTablePageEvent } from 'primevue/datatable';
-import { useToast } from 'primevue/usetoast';
 import { computed, ref } from 'vue';
 import draggable from 'vuedraggable';
 import AddToStudentDictionary from '../students/AddToStudentDictionary.vue';
@@ -163,7 +163,7 @@ const { hasActiveFilters } = storeToRefs(useSearchStore());
 const props = defineProps(['loading']);
 
 const drag = ref(false);
-const toast = useToast();
+const toast = useToastHelper();
 const isAdmin = computed(() => pb.authStore.model?.isSuper);
 
 const dragOptions = computed(() => {
@@ -179,12 +179,7 @@ const handleReorder = async (tags: any[], word: string, wordId: number, isPhonem
   try {
     await reorderTags(word, String(wordId), tags, isPhoneme);
   } catch (error) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: `Failed to reorder ${isPhoneme ? 'phonemes' : 'phonograms'} for "${word}"`,
-      life: 3000,
-    });
+    toast.error(`Failed to reorder ${isPhoneme ? 'phonemes' : 'phonograms'} for "${word}"`);
   }
 };
 

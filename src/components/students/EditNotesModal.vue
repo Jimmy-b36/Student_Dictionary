@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import { useStudentService, type IStudentWord } from '@/composables/student.service'
-import { useToast } from 'primevue/usetoast'
+import { useToastHelper } from '@/composables/toast.helper'
 import { ref, watch } from 'vue'
 
 const props = defineProps<{
@@ -45,7 +45,7 @@ const emit = defineEmits<{
 const notes = ref('')
 const loading = ref(false)
 const visible = ref(false)
-const toast = useToast()
+const toast = useToastHelper()
 const studentService = useStudentService()
 
 watch(
@@ -69,23 +69,11 @@ const handleSaveNotes = async () => {
     await studentService.updateStudentWord(props.studentId, props.word.id, {
       notes: notes.value
     })
-
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Notes updated successfully',
-      life: 3000
-    })
-
+    toast.success('Notes updated successfully')
     visible.value = false
     emit('notes-saved')
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: 'Failed to update notes',
-      life: 3000
-    })
+    toast.error('Failed to update notes')
   } finally {
     loading.value = false
   }

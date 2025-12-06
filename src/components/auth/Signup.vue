@@ -72,14 +72,14 @@
 
 <script setup lang="ts">
 import { useAuthService } from '@/composables/auth.service'
-import { useToast } from 'primevue/usetoast'
+import { useToastHelper } from '@/composables/toast.helper'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import TOSDialog from './TOSDialog.vue'
 
 const router = useRouter()
 const { signup } = useAuthService()
-const toast = useToast()
+const toast = useToastHelper()
 const isSubmitting = ref(false)
 const tosDialogRef = ref()
 
@@ -133,12 +133,7 @@ const validateForm = (): boolean => {
 
   if (errors.length > 0) {
     console.log('🔥', errors)
-    toast.add({
-      severity: 'error',
-      summary: 'Validation Error',
-      detail: errors.join('\n'),
-      life: 3000
-    })
+    toast.error(errors.join('\n'), 'Validation Error')
   }
 
   return errors.length === 0
@@ -151,28 +146,13 @@ const handleSubmit = async () => {
   try {
     const success = await signup(form.email, form.password, form.confirmPassword, form.tosAccepted)
     if (success) {
-      toast.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Account created successfully',
-        life: 3000
-      })
+      toast.success('Account created successfully')
       router.push('/home')
     } else {
-      toast.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to create account',
-        life: 3000
-      })
+      toast.error('Failed to create account')
     }
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: error.message || 'Failed to create account',
-      life: 3000
-    })
+    toast.error(error.message || 'Failed to create account')
   } finally {
     isSubmitting.value = false
   }

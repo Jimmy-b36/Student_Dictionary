@@ -41,13 +41,13 @@
 
 <script setup lang="ts">
 import { useAuthService } from '@/composables/auth.service';
-import { useToast } from 'primevue/usetoast';
+import { useToastHelper } from '@/composables/toast.helper';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 const { login, adminLogin } = useAuthService();
 
 const router = useRouter();
-const toast = useToast();
+const toast = useToastHelper();
 
 const props = defineProps(['isAdminLogin']);
 
@@ -64,12 +64,7 @@ const handleSubmit = async () => {
       success && router.push('/home/dictionary');
     }
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: error.message || 'Failed to login',
-      life: 3000,
-    });
+    toast.error(error.message || 'Failed to login');
   }
 };
 </script>

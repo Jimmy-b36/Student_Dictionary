@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { useDictionaryService } from '@/composables/dictionary.service';
-import { useToast } from 'primevue/usetoast';
+import { useToastHelper } from '@/composables/toast.helper';
 import { ref } from 'vue';
 
 const props = defineProps<{
@@ -39,7 +39,7 @@ const emit = defineEmits<{
 }>();
 
 const { deleteWordFromDictionary } = useDictionaryService();
-const toast = useToast();
+const toast = useToastHelper();
 const visible = ref(false);
 const loading = ref(false);
 
@@ -51,21 +51,11 @@ const handleDelete = async () => {
   loading.value = true;
   try {
     await deleteWordFromDictionary(props.wordId);
-    toast.add({
-      severity: 'success',
-      summary: 'Deleted',
-      detail: `Deleted "${props.word}" from dictionary`,
-      life: 2500,
-    });
+    toast.success(`Deleted "${props.word}" from dictionary`, 'Deleted');
     visible.value = false;
     emit('word-deleted');
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: error.message || 'Failed to delete word',
-      life: 3000,
-    });
+    toast.error(error.message || 'Failed to delete word');
   } finally {
     loading.value = false;
   }

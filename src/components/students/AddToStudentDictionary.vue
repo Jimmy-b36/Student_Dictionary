@@ -101,9 +101,9 @@
 
 <script setup lang="ts">
 import { useStudentService, type IStudent } from '@/composables/student.service'
+import { useToastHelper } from '@/composables/toast.helper'
 import { pb } from '@/utils/pocketbaseConnection'
 import type { ToastMessageOptions } from 'primevue'
-import { useToast } from 'primevue/usetoast'
 import { defineProps, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -117,7 +117,7 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
-const toast = useToast()
+const toast = useToastHelper()
 const studentService = useStudentService()
 const showDialog = ref(false)
 const selectedStudent = ref<IStudent | null>(null)
@@ -133,12 +133,7 @@ const openDialog = async () => {
     const studentsData = await studentService.fetchStudents()
     students.value = studentsData
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: 'Could not load your students',
-      life: 3000
-    })
+    toast.error('Could not load your students')
   }
 }
 
@@ -149,7 +144,7 @@ const addWordToStudent = async () => {
     await studentService.addWordToStudent(selectedStudent.value.id, props.word.id, notes.value)
 
     // TODO: can I add a link in here directly to the student's dictionary?
-    toast.add({
+    toast.toast.add({
       severity: 'success',
       summary: 'Success',
       detail: `Added "${props.word.word}" to ${selectedStudent.value.display_name}'s dictionary`,
@@ -161,12 +156,7 @@ const addWordToStudent = async () => {
     notes.value = ''
     showDialog.value = false
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: error.message || 'Failed to add word to student',
-      life: 3000
-    })
+    toast.error(error.message || 'Failed to add word to student')
   }
 }
 
