@@ -44,7 +44,7 @@
         <Button
           label="Refresh Dictionary"
           icon="pi pi-refresh"
-          @click="loadFilteredDictionary"
+          @click="handleRefresh"
           :loading="loading"
         />
       </div>
@@ -76,7 +76,7 @@
                 size="small"
                 severity="success"
                 text
-                @click="addWordToStudent(data)"
+                @click="handleAddWord(data)"
                 :loading="addingWords.has(data.word)"
                 v-tooltip.top="'Add to student dictionary'"
               />
@@ -121,38 +121,27 @@
 </template>
 
 <script setup lang="ts">
-import { useDictionaryService } from '@/composables/dictionary.service';
-import {
-  useStudentService,
-  type IStudentPhoneme,
-  type IStudentPhonogram,
-} from '@/composables/student.service';
+import type { IStudentPhoneme, IStudentPhonogram } from '@/composables/student.service';
 import { useDictionaryStore } from '@/stores/dictionary';
 import { storeToRefs } from 'pinia';
-import { useToast } from 'primevue/usetoast';
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed } from 'vue';
 
 interface Props {
-  studentId: string;
   studentPhonemes: IStudentPhoneme[];
   studentPhonograms: IStudentPhonogram[];
+  loading: boolean;
+  addingWords: Set<string>;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  'word-added': [];
+  refresh: [];
+  'add-word': [wordData: { word: string; wordId: string }];
 }>();
 
-const dictionaryService = useDictionaryService();
-const studentService = useStudentService();
 const dictionaryStore = useDictionaryStore();
-const toast = useToast();
-const { dictionary, phonemes, phonograms, loading: dictLoading } = storeToRefs(dictionaryStore);
-
-const loading = ref(false);
-const isInitialized = ref(false);
-const addingWords = ref(new Set<string>());
+const { dictionary } = storeToRefs(dictionaryStore);
 
 const filteredWords = computed(() => {
   return Array.from(dictionary.value.entries()).map(([word, entry]) => ({
@@ -163,119 +152,11 @@ const filteredWords = computed(() => {
   }));
 });
 
-const loadFilteredDictionary = async () => {
-  if (!isInitialized.value) {
-    console.log('Dictionary not yet initialized, waiting...');
-    return;
-  }
-
-  if (dictLoading.value) {
-    console.log('Dictionary still loading, waiting...');
-    return;
-  }
-
-  if (props.studentPhonemes.length === 0 && props.studentPhonograms.length === 0) {
-    dictionary.value.clear();
-    return;
-  }
-
-  loading.value = true;
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    const phonemeSearchArr = props.studentPhonemes.map((p) => ({
-      id: p.phoneme_id,
-      phoneme: p.phoneme,
-    }));
-
-    const phonogramSearchArr = props.studentPhonograms.map((p) => ({
-      id: p.phonogram_id,
-      phonogram: p.phonogram,
-    }));
-
-    if (phonemeSearchArr.length > 0) {
-      await dictionaryService.phonemeSearch(phonemeSearchArr);
-    }
-
-    if (phonogramSearchArr.length > 0) {
-      if (phonemeSearchArr.length === 0) {
-        await dictionaryService.phonogramSearch(phonogramSearchArr);
-      } else {
-        const phonemeResults = new Map(dictionary.value);
-
-        await dictionaryService.phonogramSearch(phonogramSearchArr);
-        const phonogramResults = new Map(dictionary.value);
-
-        dictionary.value.clear();
-        for (const [word, entry] of phonemeResults) {
-          if (phonogramResults.has(word)) {
-            dictionary.value.set(word, entry);
-          }
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Error loading filtered dictionary:', error);
-    await dictionaryService.getDictionaryPage(1, 50);
-  } finally {
-    loading.value = false;
-  }
+const handleAddWord = (wordData: { word: string; wordId: string }) => {
+  emit('add-word', wordData);
 };
 
-const addWordToStudent = async (wordData: { word: string; wordId: string }) => {
-  console.log('🔥 addWordToStudent - wordData:', wordData);
-
-  if (!wordData.wordId) {
-    console.error('❌ wordId is missing from wordData:', wordData);
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: 'Word ID is missing - cannot add to student dictionary',
-      life: 5000,
-    });
-    return;
-  }
-
-  addingWords.value.add(wordData.word);
-
-  try {
-    await studentService.addWordToStudent(props.studentId, wordData.wordId);
-
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: `Added "${wordData.word}" to student's dictionary`,
-      life: 3000,
-    });
-
-    emit('word-added');
-  } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: error.message || 'Failed to add word to student',
-      life: 5000,
-    });
-  } finally {
-    addingWords.value.delete(wordData.word);
-  }
+const handleRefresh = () => {
+  emit('refresh');
 };
-
-watch(() => [props.studentPhonemes, props.studentPhonograms], loadFilteredDictionary, {
-  deep: true,
-  immediate: true,
-});
-
-onMounted(async () => {
-  const checkInitialization = () => {
-    if (phonemes.value.length > 0 && phonograms.value.length > 0 && !dictLoading.value) {
-      isInitialized.value = true;
-      loadFilteredDictionary();
-    } else {
-      setTimeout(checkInitialization, 200);
-    }
-  };
-
-  checkInitialization();
-});
 </script>
