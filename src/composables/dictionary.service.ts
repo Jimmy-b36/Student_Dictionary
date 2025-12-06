@@ -131,10 +131,12 @@ export const useDictionaryService = () => {
 
     try {
       const uniqueKey = `${searchParam}_${Date.now()}`;
-      const result = await pb.collection('words_with_relations').getList<IDictionaryResponse>(1, 30, {
-        filter: `word~"${searchParam}"`,
-        requestKey: uniqueKey,
-      });
+      const result = await pb
+        .collection('words_with_relations')
+        .getList<IDictionaryResponse>(1, 30, {
+          filter: `word~"${searchParam}"`,
+          requestKey: uniqueKey,
+        });
 
       if (result.items.length) {
         result.items.forEach((item) => {
@@ -150,9 +152,7 @@ export const useDictionaryService = () => {
     }
   };
 
-  const phonemeSearch = async (
-    phonemeSearchArr: { id: string; phoneme: string }[]
-  ) => {
+  const phonemeSearch = async (phonemeSearchArr: { id: string; phoneme: string }[]) => {
     if (phonemeSearchArr.length === 0) {
       await getDictionaryPage(1, 100);
       return;
@@ -166,14 +166,16 @@ export const useDictionaryService = () => {
       .map((phoneme) => `phonemes ~ "${phoneme.phoneme}"`)
       .join(' || '); // Use || for "words with any of these phonemes"
 
-    const wordsResponse = await pb.collection('words_with_relations').getFullList<IDictionaryResponse>({
-      filter: phonemeFilter,
-      requestKey: null,
-    });
+    const wordsResponse = await pb
+      .collection('words_with_relations')
+      .getList<IDictionaryResponse>(1, 1000, {
+        filter: phonemeFilter,
+        requestKey: null,
+      });
 
     const processedWords = new Map<string, IDictionaryEntry>();
 
-    wordsResponse.forEach((item) => {
+    wordsResponse.items.forEach((item) => {
       const entry = parseViewResponse(item);
 
       // Only add words where ALL phonemes are in the learned set
@@ -194,9 +196,7 @@ export const useDictionaryService = () => {
     return processedWords;
   };
 
-  const phonogramSearch = async (
-    phonogramSearchArr: { id: string; phonogram: string }[]
-  ) => {
+  const phonogramSearch = async (phonogramSearchArr: { id: string; phonogram: string }[]) => {
     if (phonogramSearchArr.length === 0) {
       await getDictionaryPage(1, 100);
       return;
@@ -210,14 +210,16 @@ export const useDictionaryService = () => {
       .map((phonogram) => `phonograms ~ "${phonogram.phonogram}"`)
       .join(' || '); // Use || for "words with any of these phonograms"
 
-    const wordsResponse = await pb.collection('words_with_relations').getFullList<IDictionaryResponse>({
-      filter: phonogramFilter,
-      requestKey: null,
-    });
+    const wordsResponse = await pb
+      .collection('words_with_relations')
+      .getList<IDictionaryResponse>(1, 1000, {
+        filter: phonogramFilter,
+        requestKey: null,
+      });
 
     const processedWords = new Map<string, IDictionaryEntry>();
 
-    wordsResponse.forEach((item) => {
+    wordsResponse.items.forEach((item) => {
       const entry = parseViewResponse(item);
 
       // Only add words where ALL phonograms are in the learned set
@@ -269,15 +271,17 @@ export const useDictionaryService = () => {
     // Combine filters with AND logic (must match both phonemes AND phonograms if both are specified)
     const combinedFilter = filters.join(' && ');
 
-    const wordsResponse = await pb.collection('words_with_relations').getFullList<IDictionaryResponse>({
-      filter: combinedFilter,
-      requestKey: null,
-    });
+    const wordsResponse = await pb
+      .collection('words_with_relations')
+      .getList<IDictionaryResponse>(1, 1000, {
+        filter: combinedFilter,
+        requestKey: null,
+      });
 
     // Process results
     const finalWords = new Map<string, IDictionaryEntry>();
 
-    wordsResponse.forEach((item) => {
+    wordsResponse.items.forEach((item) => {
       const entry = parseViewResponse(item);
 
       // Check phoneme criteria - all phonemes must be learned
@@ -327,7 +331,7 @@ export const useDictionaryService = () => {
     }
   };
 
-  type Tag = { id: string;[key: string]: string };
+  type Tag = { id: string; [key: string]: string };
 
   // Remove tag from word
   const removeTagFromWord = async (
@@ -351,7 +355,7 @@ export const useDictionaryService = () => {
         await _delete(collection, res[0].id, `${tag.tag} from ${word}`);
       }
 
-      entry[type].forEach((value: { id: string;[key: string]: string }) => {
+      entry[type].forEach((value: { id: string; [key: string]: string }) => {
         if (value.id === tag.id) {
           if (isPhoneme) {
             entry.phonemes.delete(value as { id: string; phoneme: string });
@@ -386,7 +390,7 @@ export const useDictionaryService = () => {
     };
 
     let hasTag = false;
-    entry[type].forEach((value: { id: string;[key: string]: string }) => {
+    entry[type].forEach((value: { id: string; [key: string]: string }) => {
       if (value.id === tagWithCorrectKey.id) hasTag = true;
     });
 
@@ -419,7 +423,7 @@ export const useDictionaryService = () => {
   const reorderTags = async (
     word: string,
     wordId: string,
-    tags: Array<{ id: string;[key: string]: string }>,
+    tags: Array<{ id: string; [key: string]: string }>,
     isPhoneme: boolean
   ): Promise<void> => {
     const entry = dictionary.value.get(word);
@@ -444,17 +448,19 @@ export const useDictionaryService = () => {
         filter: `word="${wordId}"`,
       });
 
-      for (const tag of existingTags) {
-        await _delete(collection, tag.id, `${tagKey} from ${word}`);
-      }
+      await Promise.all(
+        existingTags.map((tag) => _delete(collection, tag.id, `${tagKey} from ${word}`))
+      );
 
       // Create new associations in order
-      for (const tag of tags) {
-        await pb.collection(collection).create({
-          word: wordId,
-          [tagKey]: tag.id,
-        });
-      }
+      await Promise.all(
+        tags.map((tag) =>
+          pb.collection(collection).create({
+            word: wordId,
+            [tagKey]: tag.id,
+          })
+        )
+      );
     } catch (error) {
       // Restore original state if an error occurs
       if (isPhoneme) {
@@ -491,45 +497,49 @@ export const useDictionaryService = () => {
     const created = await pb.collection('global_dictionary').create({ word });
     const wordId = created.id;
 
-    // Add phonemes
-    for (const phonemeId of phonemeIds) {
-      await pb.collection('word_phonemes').create({ word: wordId, phoneme: phonemeId });
-    }
-    // Add phonograms
-    for (const phonogramId of phonogramIds) {
-      await pb.collection('word_phonograms').create({ word: wordId, phonogram: phonogramId });
-    }
+    // Add phonemes and phonograms in parallel
+    await Promise.all([
+      ...phonemeIds.map((phonemeId) =>
+        pb.collection('word_phonemes').create({ word: wordId, phoneme: phonemeId })
+      ),
+      ...phonogramIds.map((phonogramId) =>
+        pb.collection('word_phonograms').create({ word: wordId, phonogram: phonogramId })
+      ),
+    ]);
+
     return created;
   };
 
   const addPhonemesToWord = async (wordId: string, phonemeIds: string[]) => {
-    for (const phonemeId of phonemeIds) {
-      await pb.collection('word_phonemes').create({ word: wordId, phoneme: phonemeId });
-    }
+    await Promise.all(
+      phonemeIds.map((phonemeId) =>
+        pb.collection('word_phonemes').create({ word: wordId, phoneme: phonemeId })
+      )
+    );
   };
 
   const addPhonogramsToWord = async (wordId: string, phonogramIds: string[]) => {
-    for (const phonogramId of phonogramIds) {
-      await pb.collection('word_phonograms').create({ word: wordId, phonogram: phonogramId });
-    }
+    await Promise.all(
+      phonogramIds.map((phonogramId) =>
+        pb.collection('word_phonograms').create({ word: wordId, phonogram: phonogramId })
+      )
+    );
   };
 
   const deleteWordFromDictionary = async (wordId: string) => {
     try {
-      // Delete all word_phonemes
-      const phonemeLinks = await pb
-        .collection('word_phonemes')
-        .getFullList({ filter: `word="${wordId}"` });
-      for (const link of phonemeLinks) {
-        await pb.collection('word_phonemes').delete(link.id);
-      }
-      // Delete all word_phonograms
-      const phonogramLinks = await pb
-        .collection('word_phonograms')
-        .getFullList({ filter: `word="${wordId}"` });
-      for (const link of phonogramLinks) {
-        await pb.collection('word_phonograms').delete(link.id);
-      }
+      // Fetch all related data in parallel
+      const [phonemeLinks, phonogramLinks] = await Promise.all([
+        pb.collection('word_phonemes').getFullList({ filter: `word="${wordId}"` }),
+        pb.collection('word_phonograms').getFullList({ filter: `word="${wordId}"` }),
+      ]);
+
+      // Delete all phoneme and phonogram links in parallel
+      await Promise.all([
+        ...phonemeLinks.map((link) => pb.collection('word_phonemes').delete(link.id)),
+        ...phonogramLinks.map((link) => pb.collection('word_phonograms').delete(link.id)),
+      ]);
+
       // Delete the word itself
       await pb.collection('global_dictionary').delete(wordId);
       return true;
