@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { useDictionaryStore } from '../stores/dictionary';
 import { pb } from '../utils/pocketbaseConnection';
+import { v4 as uuid } from 'uuid';
 
 const DEBOUNCE_TIMEOUT = 200;
 
@@ -49,7 +50,6 @@ export const useDictionaryService = () => {
         .collection('words_with_relations')
         .getList<IDictionaryResponse>(currentPage, pageSize, {
           skipTotal: true,
-          requestKey: null, // Disable auto-cancellation
         });
 
       if (currentPage === 1) {
@@ -170,7 +170,6 @@ export const useDictionaryService = () => {
       .collection('words_with_relations')
       .getList<IDictionaryResponse>(1, 1000, {
         filter: phonemeFilter,
-        requestKey: null,
       });
 
     const processedWords = new Map<string, IDictionaryEntry>();
@@ -275,7 +274,6 @@ export const useDictionaryService = () => {
       .collection('words_with_relations')
       .getList<IDictionaryResponse>(1, 1000, {
         filter: combinedFilter,
-        requestKey: null,
       });
 
     // Process results
@@ -331,7 +329,7 @@ export const useDictionaryService = () => {
     }
   };
 
-  type Tag = { id: string; [key: string]: string };
+  type Tag = { id: string;[key: string]: string };
 
   // Remove tag from word
   const removeTagFromWord = async (
@@ -355,7 +353,7 @@ export const useDictionaryService = () => {
         await _delete(collection, res[0].id, `${tag.tag} from ${word}`);
       }
 
-      entry[type].forEach((value: { id: string; [key: string]: string }) => {
+      entry[type].forEach((value: { id: string;[key: string]: string }) => {
         if (value.id === tag.id) {
           if (isPhoneme) {
             entry.phonemes.delete(value as { id: string; phoneme: string });
@@ -390,7 +388,7 @@ export const useDictionaryService = () => {
     };
 
     let hasTag = false;
-    entry[type].forEach((value: { id: string; [key: string]: string }) => {
+    entry[type].forEach((value: { id: string;[key: string]: string }) => {
       if (value.id === tagWithCorrectKey.id) hasTag = true;
     });
 
@@ -423,7 +421,7 @@ export const useDictionaryService = () => {
   const reorderTags = async (
     word: string,
     wordId: string,
-    tags: Array<{ id: string; [key: string]: string }>,
+    tags: Array<{ id: string;[key: string]: string }>,
     isPhoneme: boolean
   ): Promise<void> => {
     const entry = dictionary.value.get(word);
@@ -458,11 +456,10 @@ export const useDictionaryService = () => {
           pb.collection(collection).create({
             word: wordId,
             [tagKey]: tag.id,
-          })
+          }, { requestKey: uuid() })
         )
       );
     } catch (error) {
-      // Restore original state if an error occurs
       if (isPhoneme) {
         entry.phonemes = originalPhonemes;
       } else {
