@@ -121,42 +121,43 @@
 </template>
 
 <script setup lang="ts">
-import type { IStudentPhoneme, IStudentPhonogram } from '@/composables/student.service';
-import { useDictionaryStore } from '@/stores/dictionary';
-import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
+import type { IStudentPhoneme, IStudentPhonogram } from '@/composables/student.service'
+import { useDictionaryStore } from '@/stores/dictionary'
+import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 
 interface Props {
-  studentPhonemes: IStudentPhoneme[];
-  studentPhonograms: IStudentPhonogram[];
-  loading: boolean;
-  addingWords: Set<string>;
+  studentPhonemes: IStudentPhoneme[]
+  studentPhonograms: IStudentPhonogram[]
+  loading: boolean
+  addingWords: Set<string>
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props>()
 
 const emit = defineEmits<{
-  refresh: [];
-  'add-word': [wordData: { word: string; wordId: string }];
-}>();
+  refresh: []
+  'add-word': [wordData: { word: string; wordId: string }]
+}>()
 
-const dictionaryStore = useDictionaryStore();
-const { dictionary } = storeToRefs(dictionaryStore);
+const dictionaryStore = useDictionaryStore()
+const { dictionary } = storeToRefs(dictionaryStore)
 
 const filteredWords = computed(() => {
   return Array.from(dictionary.value.entries()).map(([word, entry]) => ({
     word,
     wordId: entry.wordId,
     phonemes: entry.phonemes,
-    phonograms: entry.phonograms,
-  }));
-});
-
+    phonograms: entry.phonograms
+  }))
+})
+console.log('filtered', filteredWords.value)
+console.log('dictionary', dictionary.value)
 const handleAddWord = (wordData: { word: string; wordId: string }) => {
-  emit('add-word', wordData);
-};
+  emit('add-word', wordData)
+}
 
 const handleRefresh = () => {
-  emit('refresh');
-};
+  emit('refresh')
+}
 </script>

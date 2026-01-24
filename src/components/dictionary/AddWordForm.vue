@@ -90,7 +90,6 @@ const validateWord = (word: string): string | null => {
 const onSubmit = async () => {
   error.value = ''
 
-  // Validate word
   const validationError = validateWord(word.value)
   if (validationError) {
     error.value = validationError

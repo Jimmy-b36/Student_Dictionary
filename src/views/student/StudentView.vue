@@ -142,8 +142,9 @@ const initStudentData = async (student: IStudent) => {
       await dictionaryService.combinedSearchParallel(phonemeSearchArr, phonogramSearchArr)
     } catch (error) {
       console.error('Error loading filtered dictionary:', error)
-      await dictionaryService.getDictionaryPage(1, 50)
     }
+  } else {
+    await dictionaryService.combinedSearchParallel([], [])
   }
 
   state.value = {
@@ -158,7 +159,6 @@ const initStudentData = async (student: IStudent) => {
 
 const loadFilteredDictionary = async () => {
   if (state.value.status !== 'loaded') return
-
   const { studentPhonemes, studentPhonograms } = state.value
 
   if (studentPhonemes.length === 0 && studentPhonograms.length === 0) {
