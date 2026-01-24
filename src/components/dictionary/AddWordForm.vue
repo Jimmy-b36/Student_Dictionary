@@ -61,8 +61,8 @@ import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 
 const word = ref('')
-const selectedPhonemes = ref([])
-const selectedPhonograms = ref([])
+const selectedPhonemes = ref<{ id: string; phoneme: string }[]>([])
+const selectedPhonograms = ref<{ id: string; phonogram: string }[]>([])
 const error = ref('')
 
 const dictionaryStore = storeToRefs(useDictionaryStore())

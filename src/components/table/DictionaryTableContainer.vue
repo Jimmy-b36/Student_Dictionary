@@ -52,22 +52,19 @@ const phonogramSearchParams = ref<{ id: string; phonogram: string }[]>([])
 
 const wordSearchParams = ref('')
 
-const handleSearchParamChange = <T,>(
-  type: 'word' | 'phoneme' | 'phonogram',
-  value: T,
-  isEmpty: (val: T) => boolean
-) => {
-  if (isEmpty(value)) {
-    searchState.value.currentFilters[type] = null
-    search()
-  } else {
-    if (type === 'word') {
-      searchState.value.currentFilters.word = value
-    } else {
-      searchState.value.currentFilters[type] = new Set(value)
-    }
-    search()
-  }
+const handleWordSearchChange = (value: string) => {
+  searchState.value.currentFilters.word = value === '' ? null : value
+  search()
+}
+
+const handlePhonemeSearchChange = (value: { id: string; phoneme: string }[]) => {
+  searchState.value.currentFilters.phoneme = value.length === 0 ? null : new Set(value)
+  search()
+}
+
+const handlePhonogramSearchChange = (value: { id: string; phonogram: string }[]) => {
+  searchState.value.currentFilters.phonogram = value.length === 0 ? null : new Set(value)
+  search()
 }
 
 onMounted(async () => {
@@ -79,14 +76,14 @@ onMounted(async () => {
 })
 
 watch(wordSearchParams, (value) => {
-  handleSearchParamChange('word', value, (val) => val === '')
+  handleWordSearchChange(value)
 })
 
 watch(phonemeSearchParams, (value) => {
-  handleSearchParamChange('phoneme', value, (val) => val.length === 0)
+  handlePhonemeSearchChange(value)
 })
 
 watch(phonogramSearchParams, (value) => {
-  handleSearchParamChange('phonogram', value, (val) => val.length === 0)
+  handlePhonogramSearchChange(value)
 })
 </script>
