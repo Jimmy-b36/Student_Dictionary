@@ -62,9 +62,9 @@ const handleSearchParamChange = <T,>(
     search()
   } else {
     if (type === 'word') {
-      searchState.value.currentFilters.word = value as string
+      searchState.value.currentFilters.word = value
     } else {
-      searchState.value.currentFilters[type] = new Set(value as any[])
+      searchState.value.currentFilters[type] = new Set(value)
     }
     search()
   }

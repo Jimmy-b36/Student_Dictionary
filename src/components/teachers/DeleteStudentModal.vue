@@ -39,8 +39,6 @@
 <script setup lang="ts">
 import { useStudentService, type IStudent } from '@/composables/student.service';
 import { useToastHelper } from '@/composables/toast.helper';
-import { useStudentStore } from '@/stores/student.store';
-import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 
 const props = defineProps<{
@@ -48,9 +46,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(['deleted']);
-const studentStore = useStudentStore();
 const studentService = useStudentService();
-const { loading } = storeToRefs(studentStore);
 const toast = useToastHelper();
 const isVisible = ref(false);
 

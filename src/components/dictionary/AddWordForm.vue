@@ -61,7 +61,7 @@ import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 
 const word = ref('');
-const selectedPhonemes = ref([]);
+const selectedPhonemes:  = ref([]);
 const selectedPhonograms = ref([]);
 const error = ref('');
 
@@ -100,8 +100,8 @@ const onSubmit = async () => {
   try {
     await addWordToDictionary(
       word.value.trim(),
-      selectedPhonemes.value.map((p: any) => p.id),
-      selectedPhonograms.value.map((p: any) => p.id)
+      selectedPhonemes.value.map((p) => p.id),
+      selectedPhonograms.value.map((p => p.id)
     );
     word.value = '';
     selectedPhonemes.value = [];

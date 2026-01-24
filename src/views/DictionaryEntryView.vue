@@ -1,8 +1,5 @@
 <template>
-  <AddWordForm />
+  <div class="container py-10 mx-auto">
+    <AddWordForm />
+  </div>
 </template>
-
-<script setup lang="ts">
-</script>
-
-<style lang="css"></style>
