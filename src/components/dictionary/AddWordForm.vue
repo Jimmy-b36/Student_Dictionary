@@ -54,64 +54,64 @@
   </form>
 </template>
 <script setup lang="ts">
-import { useDictionaryService } from '@/composables/dictionary.service';
-import { useToastHelper } from '@/composables/toast.helper';
-import { useDictionaryStore } from '@/stores/dictionary';
-import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { useDictionaryService } from '@/composables/dictionary.service'
+import { useToastHelper } from '@/composables/toast.helper'
+import { useDictionaryStore } from '@/stores/dictionary'
+import { storeToRefs } from 'pinia'
+import { ref } from 'vue'
 
-const word = ref('');
-const selectedPhonemes:  = ref([]);
-const selectedPhonograms = ref([]);
-const error = ref('');
+const word = ref('')
+const selectedPhonemes = ref([])
+const selectedPhonograms = ref([])
+const error = ref('')
 
-const dictionaryStore = storeToRefs(useDictionaryStore());
-const { phonemes, phonograms } = dictionaryStore;
-const { addWordToDictionary } = useDictionaryService();
+const dictionaryStore = storeToRefs(useDictionaryStore())
+const { phonemes, phonograms } = dictionaryStore
+const { addWordToDictionary } = useDictionaryService()
 
-const toast = useToastHelper();
+const toast = useToastHelper()
 
 const validateWord = (word: string): string | null => {
   if (!word.trim()) {
-    return 'Word is required';
+    return 'Word is required'
   }
 
   if (word.trim().length > 50) {
-    return 'Word must be at most 50 characters long';
+    return 'Word must be at most 50 characters long'
   }
 
   if (!/^[a-zA-Z]+$/.test(word.trim())) {
-    return 'Word must contain only letters (no spaces, numbers, or special characters)';
+    return 'Word must contain only letters (no spaces, numbers, or special characters)'
   }
 
-  return null;
-};
+  return null
+}
 
 const onSubmit = async () => {
-  error.value = '';
+  error.value = ''
 
   // Validate word
-  const validationError = validateWord(word.value);
+  const validationError = validateWord(word.value)
   if (validationError) {
-    error.value = validationError;
-    return;
+    error.value = validationError
+    return
   }
 
   try {
     await addWordToDictionary(
       word.value.trim(),
       selectedPhonemes.value.map((p) => p.id),
-      selectedPhonograms.value.map((p => p.id)
-    );
-    word.value = '';
-    selectedPhonemes.value = [];
-    selectedPhonograms.value = [];
-    toast.success('Successfully added word to dictionary!', 'Word Added');
+      selectedPhonograms.value.map((p) => p.id)
+    )
+    word.value = ''
+    selectedPhonemes.value = []
+    selectedPhonograms.value = []
+    toast.success('Successfully added word to dictionary!', 'Word Added')
   } catch (e: any) {
-    error.value = e.message;
-    console.log('🔥', e);
+    error.value = e.message
+    console.log('🔥', e)
   }
-};
+}
 </script>
 <style lang="css">
 .fade-enter-active,
